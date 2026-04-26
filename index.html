@@ -270,7 +270,7 @@
 
 <header>
   <h1 class="logo">
-    Ouroboros Hub
+    Ouroboros 
     <img src="Ouroboros.png" alt="logo">
   </h1>
 
@@ -453,13 +453,21 @@ calcInput.onkeydown=e=>{
 };
 
 /* PYTHON */
+/* PYTHON */
 let pyodide;
 let editor;
+let pyodideLoading = false;
 
-loadPyodide().then(p => pyodide = p);
+async function loadPyodideIfNeeded(){
+  if(pyodide) return;
+  if(pyodideLoading) return;
+  pyodideLoading = true;
+  pyodide = await loadPyodide();
+}
 
 function openPython(){
   pyModal.classList.remove("hidden");
+  loadPyodideIfNeeded();
   if(editor) {
     setTimeout(() => editor.refresh(), 10);
   }
