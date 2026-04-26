@@ -14,16 +14,6 @@
       --text: #e2e8f0;
       --muted: #94a3b8;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-  .logo img {
-      width: 56px;
-      height: 56px;
-    }
 
     * {
       margin: 0;
@@ -51,6 +41,17 @@
     header h1 {
       font-size: 1.5rem;
       color: var(--accent);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .logo img {
+      width: 56px;
+      height: auto;
     }
 
     nav a {
@@ -175,9 +176,10 @@
 
 <header>
   <h1 class="logo">
-  Ouroboros Hub
-  <img src="Ouroboros.png" alt="logo">
+    Ouroboros Hub
+    <img src="Ouroboros.png" alt="logo">
   </h1>
+
   <nav>
     <a href="#">Home</a>
     <a href="#">Tools</a>
@@ -209,17 +211,12 @@
   </div>
 
   <div class="card">
-    <h2>Sandbox</h2>
-    <p>Test ideas and experiments.</p>
-  </div>
-
-  <div class="card">
     <h2>Music Player</h2>
     <p>Drop your song/playlist here and jam out!</p>
   </div>
 
   <div class="card" onclick="openPython()">
-    <h2>Python Runner</h2>
+    <h2>OuroShell</h2>
     <p>Run Python code in-browser.</p>
   </div>
 
@@ -238,7 +235,7 @@
 <!-- Python Modal -->
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
-    <h2>Python Runner</h2>
+    <h2>Python Terminal</h2>
 
     <textarea id="pyInput" rows="10">
 print("Hello Ouroboros")
@@ -294,7 +291,7 @@ print("Hello Ouroboros")
     }
   });
 
-  // Python
+  // Python (FIXED OUTPUT HANDLING)
   let pyodideReady = loadPyodide();
   let pyodide;
 
@@ -315,8 +312,25 @@ print("Hello Ouroboros")
     const out = document.getElementById("pyOutput");
 
     try {
+      await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+
+sys.stdout = StringIO()
+sys.stderr = sys.stdout
+      `);
+
       let result = await pyodide.runPythonAsync(code);
-      out.textContent = result ?? "Executed";
+      let output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+
+      if (output.trim()) {
+        out.textContent = output;
+      } else if (result !== undefined) {
+        out.textContent = result;
+      } else {
+        out.textContent = "No output";
+      }
+
     } catch (err) {
       out.textContent = err;
     }
