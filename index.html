@@ -71,71 +71,85 @@
     nav a:hover {
       color: var(--accent);
     }
-    /* Visualizer toolbar buttons */
-.tool-btn {
-  padding: 0.4rem 0.6rem;
+
+    .tool-btn {
+      padding: 0.4rem 0.6rem;
+      font-size: 13px;
+      background: #1e293b;
+      color: var(--text);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0;
+    }
+
+    .tool-btn:hover {
+      background: #334155;
+    }
+
+    .active-tool {
+      background: var(--accent) !important;
+      color: #000 !important;
+      border-color: var(--accent) !important;
+    }
+
+    .eq-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .eq-row input {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0b1220;
+      color: var(--text);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .eq-color {
+      width: 24px;
+      height: 24px;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .eq-remove {
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-top: 0;
+    }
+.calc-btn {
+  padding: 4px 10px;
   font-size: 13px;
-  background: #1e293b;
-  color: var(--text);
-  border: 1px solid #334155;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 0;
-}
-
-.tool-btn:hover {
-  background: #334155;
-}
-
-.active-tool {
-  background: var(--accent) !important;
-  color: #000 !important;
-  border-color: var(--accent) !important;
-}
-
-/* Equation row */
-.eq-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.eq-row input {
-  flex: 1;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #334155;
   background: #0b1220;
-  color: var(--text);
-  font-size: 14px;
-  margin: 0;
-}
-
-.eq-color {
-  width: 24px;
-  height: 24px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.eq-remove {
-  background: #ef4444;
-  border: none;
-  color: white;
+  color: var(--accent);
+  border: 1px solid #334155;
   border-radius: 6px;
-  padding: 4px 8px;
   cursor: pointer;
-  font-size: 13px;
   margin-top: 0;
+  font-weight: bold;
+}
+
+.calc-btn:hover {
+  background: #1e293b;
 }
 
     main {
       flex: 1;
       padding: 2rem;
-      padding-left: 6.1rem;  /* ← adjust this value */
+      padding-left: 6.1rem;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
       gap: 1.5rem;
@@ -218,7 +232,6 @@
       max-width: 80%;
     }
 
-    /* CodeMirror base */
     .CodeMirror {
       height: 220px;
       border-radius: 10px;
@@ -228,8 +241,6 @@
       color: #e2e8f0;
     }
 
-    /* FIX: gutter gets its own solid dark background so line numbers
-       don't bleed into the code area */
     .CodeMirror-gutters {
       background: #1a2235;
       border-right: 1px solid rgba(255,255,255,0.08);
@@ -239,18 +250,18 @@
       color: #4a5568;
       padding: 0 8px 0 6px;
     }
+
     .CodeMirror-cursor {
       border-left: 1px solid #e2e8f0;
     }
 
-  .CodeMirror,
-  .CodeMirror *,
-  .CodeMirror *::before,
-  .CodeMirror *::after {
-    box-sizing: content-box !important;
-  }
+    .CodeMirror,
+    .CodeMirror *,
+    .CodeMirror *::before,
+    .CodeMirror *::after {
+      box-sizing: content-box !important;
+    }
 
-    /* FIX: output stays inside modal */
     #pyOutput {
       max-height: 200px;
       overflow-y: auto;
@@ -270,7 +281,7 @@
 
 <header>
   <h1 class="logo">
-    Ouroboros 
+    Ouroboros
     <img src="Ouroboros.png" alt="logo">
   </h1>
 
@@ -308,10 +319,10 @@
     <p>Ask your questions here!</p>
   </div>
 
- <div class="card" onclick="openVisualizer()">
-   <h2>Canvas</h2>
-   <p>Graph functions or draw freely.</p>
- </div>
+  <div class="card" onclick="openVisualizer()">
+    <h2>Canvas</h2>
+    <p>Graph functions or draw freely.</p>
+  </div>
 
 </main>
 
@@ -319,8 +330,35 @@
 <div id="calcModal" class="modal hidden">
   <div class="modal-content">
     <h2>Calculator</h2>
-    <input id="calcInput" placeholder="2+2, sqrt(16)" />
-    <div id="calcOutput"></div>
+    <input id="calcInput" placeholder="2+2, d/dx x^3, ∫(x^2, 0, 5)" />
+    
+    <!-- Symbol buttons -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
+      <button class="calc-btn" onclick="insertCalc('d/dx ')">d/dx</button>
+      <button class="calc-btn" onclick="insertCalc('d2/dx2 ')">d²/dx²</button>
+      <button class="calc-btn" onclick="insertCalc('∫(, 0, 1)')">∫ definite</button>
+      <button class="calc-btn" onclick="insertCalc('∫ ')">∫ indefinite</button>
+      <button class="calc-btn" onclick="insertCalc('sqrt(')">√</button>
+      <button class="calc-btn" onclick="insertCalc('pi')">π</button>
+      <button class="calc-btn" onclick="insertCalc('e')">e</button>
+      <button class="calc-btn" onclick="insertCalc('^')">xⁿ</button>
+      <button class="calc-btn" onclick="insertCalc('sin(')">sin</button>
+      <button class="calc-btn" onclick="insertCalc('cos(')">cos</button>
+      <button class="calc-btn" onclick="insertCalc('tan(')">tan</button>
+      <button class="calc-btn" onclick="insertCalc('ln(')">ln</button>
+      <button class="calc-btn" onclick="insertCalc('log(')">log</button>
+      <button class="calc-btn" onclick="insertCalc('abs(')">|x|</button>
+    </div>
+
+    <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">
+      <strong>Syntax:</strong><br>
+      Derivative: <code style="background:#0b1220;padding:2px 6px;border-radius:4px;">d/dx x^3</code> → 3x²<br>
+      2nd derivative: <code style="background:#0b1220;padding:2px 6px;border-radius:4px;">d2/dx2 x^4</code> → 12x²<br>
+      Definite integral: <code style="background:#0b1220;padding:2px 6px;border-radius:4px;">∫(x^2, 0, 5)</code> → 41.667<br>
+      Indefinite integral: <code style="background:#0b1220;padding:2px 6px;border-radius:4px;">∫ x^2</code> → x^3/3 + C
+    </div>
+
+    <div id="calcOutput" style="background:#0b1220; padding:10px; border-radius:10px; min-height:40px; font-size:18px;"></div>
     <button onclick="closeCalculator()">Close</button>
   </div>
 </div>
@@ -373,11 +411,11 @@
     <button onclick="closeMusic()">Close</button>
   </div>
 </div>
+
 <!-- VISUALIZER -->
 <div id="vizModal" class="modal hidden">
   <div class="modal-content" style="max-width:900px; height:85vh; display:flex; flex-direction:column; padding:1rem;">
 
-    <!-- Mode Toggle -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <h2 id="vizTitle">📈 Graph Mode</h2>
       <div>
@@ -387,17 +425,14 @@
       </div>
     </div>
 
-    <!-- GRAPH MODE -->
     <div id="graphMode" style="flex:1; display:flex; flex-direction:column;">
       <div id="eqList" style="margin-bottom:8px;"></div>
       <button onclick="addEquation()" style="width:fit-content; margin-bottom:8px;">+ Add Equation</button>
       <canvas id="graphCanvas" style="flex:1; width:100%; background:#0b1220; border-radius:10px; cursor:crosshair;"></canvas>
     </div>
 
-    <!-- DRAW MODE -->
     <div id="drawMode" style="flex:1; display:none; flex-direction:column;">
 
-      <!-- Toolbar -->
       <div id="drawToolbar" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; padding:8px; background:#0f172a; border-radius:10px;">
 
         <label style="color:var(--muted); font-size:13px;">Tool:</label>
@@ -432,27 +467,196 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
-  
-<script>
 
-/* HERO */
-function randomGreeting(){
-  const msgs=["Keep building.","You're close.","Nice work.","Systems grow from this."];
-  alert(msgs[Math.floor(Math.random()*msgs.length)]);
-}
+<script>
 
 /* CALC */
 function openCalculator(){ calcModal.classList.remove("hidden"); }
 function closeCalculator(){ calcModal.classList.add("hidden"); }
 
-calcInput.onkeydown=e=>{
-  if(e.key==="Enter"){
-    try{ calcOutput.innerHTML=math.evaluate(calcInput.value); }
-    catch{ calcOutput.innerHTML="Error"; }
+function insertCalc(text){
+  const input = document.getElementById("calcInput");
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const val = input.value;
+  input.value = val.substring(0, start) + text + val.substring(end);
+  input.focus();
+  input.selectionStart = input.selectionEnd = start + text.length;
+}
+
+// ---- Symbolic Derivative ----
+function symbolicDerivative(expr, variable = "x"){
+  const node = math.parse(expr);
+  const derived = math.derivative(node, variable);
+  return math.simplify(derived).toString();
+}
+
+// ---- Second Derivative ----
+function symbolicSecondDerivative(expr, variable = "x"){
+  const first = symbolicDerivative(expr, variable);
+  return symbolicDerivative(first, variable);
+}
+
+// ---- Numerical Definite Integral (Simpson's Rule) ----
+function numericalIntegral(exprStr, a, b, n = 1000){
+  if(n % 2 !== 0) n++;
+  const h = (b - a) / n;
+  let sum = 0;
+  
+  const f = (x) => {
+    try {
+      return math.evaluate(exprStr, { x });
+    } catch(e) {
+      return NaN;
+    }
+  };
+  
+  sum += f(a) + f(b);
+  
+  for(let i = 1; i < n; i++){
+    const x = a + i * h;
+    sum += (i % 2 === 0 ? 2 : 4) * f(x);
+  }
+  
+  return (h / 3) * sum;
+}
+
+// ---- Symbolic Indefinite Integral (common forms) ----
+function symbolicIntegral(expr){
+  const e = expr.trim();
+  
+  // Power rule: x^n → x^(n+1)/(n+1)
+  const powerMatch = e.match(/^x\^([\d\.]+)$/);
+  if(powerMatch){
+    const n = parseFloat(powerMatch[1]);
+    if(n === -1) return "ln|x| + C";
+    return `x^${n+1}/${n+1} + C`;
+  }
+  
+  // Just x → x^2/2
+  if(e === "x") return "x^2/2 + C";
+  
+  // Constant
+  if(/^[\d\.]+$/.test(e)) return `${e}x + C`;
+  
+  // Coefficient * x^n
+  const coefPower = e.match(/^([\d\.]+)\s*\*?\s*x\^([\d\.]+)$/);
+  if(coefPower){
+    const c = parseFloat(coefPower[1]);
+    const n = parseFloat(coefPower[2]);
+    if(n === -1) return `${c} * ln|x| + C`;
+    const newCoef = c / (n + 1);
+    const simplified = Number.isInteger(newCoef) ? newCoef : newCoef.toFixed(4);
+    return `${simplified} * x^${n+1} + C`;
+  }
+
+  // Coefficient * x
+  const coefX = e.match(/^([\d\.]+)\s*\*?\s*x$/);
+  if(coefX){
+    const c = parseFloat(coefX[1]);
+    return `${c/2} * x^2 + C`;
+  }
+  
+  // Common trig/exp
+  const known = {
+    "sin(x)": "-cos(x) + C",
+    "cos(x)": "sin(x) + C",
+    "tan(x)": "-ln|cos(x)| + C",
+    "sec(x)^2": "tan(x) + C",
+    "e^x": "e^x + C",
+    "exp(x)": "e^x + C",
+    "1/x": "ln|x| + C",
+    "ln(x)": "x * ln(x) - x + C",
+    "sqrt(x)": "(2/3) * x^(3/2) + C",
+    "x^(1/2)": "(2/3) * x^(3/2) + C",
+    "1/sqrt(x)": "2 * sqrt(x) + C",
+    "sin(x)^2": "x/2 - sin(2x)/4 + C",
+    "cos(x)^2": "x/2 + sin(2x)/4 + C",
+  };
+  
+  if(known[e]) return known[e];
+  
+  // Sum of terms: try splitting by + or -
+  const terms = e.split(/(?=[\+\-])/);
+  if(terms.length > 1){
+    const integrated = terms.map(t => {
+      const result = symbolicIntegral(t.trim().replace(/^\+\s*/, ""));
+      return result.replace(" + C", "");
+    });
+    if(integrated.every(r => r !== null)){
+      return integrated.join(" + ") + " + C";
+    }
+  }
+  
+  return null;
+}
+
+// ---- Main Calculator ----
+function evaluateCalc(input){
+  const trimmed = input.trim();
+  
+  // Second derivative: d2/dx2 expr
+  const d2Match = trimmed.match(/^d2\/dx2\s+(.+)$/i);
+  if(d2Match){
+    try {
+      const result = symbolicSecondDerivative(d2Match[1]);
+      return `d²/dx²(${d2Match[1]}) = <strong>${result}</strong>`;
+    } catch(e){
+      return "❌ Could not compute second derivative: " + e.message;
+    }
+  }
+  
+  // Derivative: d/dx expr
+  const dMatch = trimmed.match(/^d\/dx\s+(.+)$/i);
+  if(dMatch){
+    try {
+      const result = symbolicDerivative(dMatch[1]);
+      return `d/dx(${dMatch[1]}) = <strong>${result}</strong>`;
+    } catch(e){
+      return "❌ Could not compute derivative: " + e.message;
+    }
+  }
+  
+  // Definite integral: ∫(expr, a, b)
+  const defIntMatch = trimmed.match(/^[∫∫]\((.+),\s*([\d\.\-]+),\s*([\d\.\-]+)\)$/);
+  if(defIntMatch){
+    try {
+      const expr = defIntMatch[1].trim();
+      const a = parseFloat(defIntMatch[2]);
+      const b = parseFloat(defIntMatch[3]);
+      const result = numericalIntegral(expr, a, b);
+      return `∫(${expr}) from ${a} to ${b} = <strong>${parseFloat(result.toFixed(6))}</strong>`;
+    } catch(e){
+      return "❌ Could not compute integral: " + e.message;
+    }
+  }
+  
+  // Indefinite integral: ∫ expr
+  const indefMatch = trimmed.match(/^[∫∫]\s+(.+)$/);
+  if(indefMatch){
+    const expr = indefMatch[1].trim();
+    const result = symbolicIntegral(expr);
+    if(result){
+      return `∫(${expr})dx = <strong>${result}</strong>`;
+    }
+    return "❌ Cannot symbolically integrate this expression. Try a definite integral with bounds: ∫(expr, a, b)";
+  }
+  
+  // Regular math
+  try {
+    const result = math.evaluate(trimmed);
+    return `= <strong>${result}</strong>`;
+  } catch(e){
+    return "❌ Error: " + e.message;
+  }
+}
+
+calcInput.onkeydown = e => {
+  if(e.key === "Enter"){
+    calcOutput.innerHTML = evaluateCalc(calcInput.value);
   }
 };
 
-/* PYTHON */
 /* PYTHON */
 let pyodide;
 let editor;
@@ -522,12 +726,16 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/* AI */
+/* ========== OUROS: In-Page AI Engine ========== */
+
 function openAI(){ aiModal.classList.remove("hidden"); }
 function closeAI(){ aiModal.classList.add("hidden"); }
 
 const chatBox = document.getElementById("chatBox");
 const aiInput = document.getElementById("aiInput");
+
+let conversationMemory = [];
+let userContext = {};
 
 function addMessage(role, text){
   const div = document.createElement("div");
@@ -537,50 +745,492 @@ function addMessage(role, text){
     div.innerHTML = "🧑 " + text;
   } else {
     div.style.background = "#0f3a4a";
-    div.innerHTML = "🤖 " + text;
+    div.innerHTML = "🤖 " + text.replace(/\n/g, "<br>");
   }
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
+  return div;
 }
 
-async function sendMessage(){
+function tokenize(text){
+  return text.toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter(w => w.length > 1);
+}
+
+const stopwords = new Set([
+  "the","a","an","is","are","was","were","be","been","being",
+  "have","has","had","do","does","did","will","would","could",
+  "should","may","might","shall","can","need","dare","ought",
+  "i","me","my","we","our","you","your","he","she","it","they",
+  "them","his","her","its","this","that","these","those","am",
+  "what","which","who","whom","when","where","why","how",
+  "not","no","nor","so","if","or","and","but","to","of","in",
+  "for","on","with","at","by","from","as","into","about","just",
+  "very","really","also","than","too","then","only","own","same"
+]);
+
+function filterTokens(tokens){
+  return tokens.filter(t => !stopwords.has(t));
+}
+
+function cosineSimilarity(a, b){
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let intersection = 0;
+  for(const word of setA){
+    if(setB.has(word)) intersection++;
+  }
+  const magnitude = Math.sqrt(setA.size) * Math.sqrt(setB.size);
+  return magnitude === 0 ? 0 : intersection / magnitude;
+}
+
+function fuzzyMatch(word, target){
+  if(word === target) return 1;
+  if(target.includes(word) || word.includes(target)) return 0.7;
+  if(word.length > 3 && target.length > 3){
+    let matches = 0;
+    const shorter = word.length < target.length ? word : target;
+    const longer = word.length < target.length ? target : word;
+    for(let i = 0; i < shorter.length; i++){
+      if(longer.includes(shorter[i])) matches++;
+    }
+    const ratio = matches / longer.length;
+    if(ratio > 0.8) return 0.5;
+  }
+  return 0;
+}
+
+function enhancedSimilarity(inputTokens, entryKeywords){
+  let score = 0;
+  const filtered = filterTokens(inputTokens);
+  score += cosineSimilarity(filtered, entryKeywords) * 2;
+  for(const token of filtered){
+    for(const kw of entryKeywords){
+      score += fuzzyMatch(token, kw) * 0.5;
+    }
+  }
+  const input = inputTokens.join(" ");
+  for(const kw of entryKeywords){
+    if(input.includes(kw)) score += kw.split(" ").length * 0.3;
+  }
+  return score;
+}
+
+const knowledgeBase = [
+  {
+    keywords: ["hello","hi","hey","sup","yo","greetings","howdy","whats up"],
+    intent: "greeting",
+    responses: [
+      "Hey there! I'm Ouros, your in-browser AI. What can I help you with?",
+      "Hi! Welcome to Ouroboros Hub. Ask me about code, math, or anything!",
+      "Hey! Ready to build something? Ask me anything.",
+      "Hello! I'm Ouros — I run entirely in your browser. No APIs, no cloud. What's up?"
+    ]
+  },
+  {
+    keywords: ["how","are","you","doing","feeling","going"],
+    intent: "status",
+    responses: [
+      "Running at full cycles! Every loop makes me stronger. What can I help with?",
+      "I'm great — processing at the speed of JavaScript! What's on your mind?",
+      "All systems nominal! What would you like to explore?"
+    ]
+  },
+  {
+    keywords: ["what","who","are","you","ouros","about","yourself"],
+    intent: "identity",
+    responses: [
+      "I'm Ouros — an AI engine built entirely in JavaScript, running right in your browser.\n\nNo API keys. No cloud. No data leaves your machine.\n\nI can help with:\n• Math & calculations\n• Python & programming\n• Explaining concepts\n• Using Ouroboros Hub tools\n• General knowledge",
+      "I'm Ouros! A self-contained AI built into Ouroboros Hub. I use pattern matching, similarity scoring, and a knowledge engine — all in pure JS. Ask me anything!"
+    ]
+  },
+  {
+    keywords: ["how","do","you","work","built","made","engine"],
+    intent: "how_work",
+    responses: [
+      "I work using:\n1. **Tokenization** — breaking your input into words\n2. **Similarity scoring** — comparing against my knowledge base\n3. **Context memory** — remembering our conversation\n4. **Template generation** — crafting natural responses\n5. **Math integration** — evaluating expressions\n\nAll running in pure JavaScript, right in your browser!",
+      "I'm built with a custom NLP-lite engine in JavaScript. I tokenize your input, score it against knowledge entries using cosine similarity and fuzzy matching, then generate a contextual response. No neural network needed!"
+    ]
+  },
+  {
+    keywords: ["calculator","calc","calculate","compute"],
+    intent: "tool_calc",
+    responses: [
+      "The Calculator supports expressions like:\n• 2+2, sqrt(16), sin(pi)\n• 2^10, log(100), abs(-5)\n• 5! (factorial)\n\nOr just type a math expression here and I'll solve it!",
+      "Click the Calculator card on the main page! It uses math.js, so almost any expression works. You can also ask me math questions directly!"
+    ]
+  },
+  {
+    keywords: ["python","code","program","ouroshell","shell","script","coding"],
+    intent: "tool_python",
+    responses: [
+      "OuroShell runs real Python in your browser via Pyodide! Try:\n• print('Hello Ouroboros')\n• [x**2 for x in range(10)]\n• import math; print(math.pi)\n• Even numpy and pandas work!\n\nUse Ctrl+Enter to run code quickly.",
+      "The Python terminal supports full Python 3 with many libraries. Click OuroShell and start coding — no installation needed!"
+    ]
+  },
+  {
+    keywords: ["graph","plot","equation","visualizer","canvas","desmos","function"],
+    intent: "tool_viz",
+    responses: [
+      "The Canvas has two modes:\n\n📈 **Graph Mode**\n• Type equations like x^2, sin(x), 2*x+1\n• Scroll to zoom, drag to pan\n• Multiple equations with different colors\n\n🎨 **Draw Mode**\n• Brush, eraser, shapes (line, rect, circle)\n• Color picker & size control\n• Text labels & undo",
+      "Try the Canvas! Graph mode works like Desmos — type any equation and watch it plot live. Draw mode gives you a full canvas with tools."
+    ]
+  },
+  {
+    keywords: ["music","playlist","youtube","song","listen","play"],
+    intent: "tool_music",
+    responses: [
+      "Paste any YouTube URL into the Music Player:\n• Single videos\n• Full playlists\n\nYou get play/pause, skip forward/back, and volume control!",
+      "The Music Player supports YouTube videos and playlists. Just paste the link and hit Load!"
+    ]
+  },
+  {
+    keywords: ["variable","variables","var","let","const","assign"],
+    intent: "prog_var",
+    responses: [
+      "**Variables in Python:**\n\nname = 'Ouros'\nage = 1\npi = 3.14159\nis_cool = True\n\n**In JavaScript:**\n\nlet name = 'Ouros';\nconst PI = 3.14;\n\nPython doesn't need type declarations — it figures it out!"
+    ]
+  },
+  {
+    keywords: ["loop","for","while","iterate","iteration","repeat"],
+    intent: "prog_loop",
+    responses: [
+      "**Python Loops:**\n\n# For loop\nfor i in range(5):\n    print(i)  # 0,1,2,3,4\n\n# While loop\nn = 0\nwhile n < 5:\n    print(n)\n    n += 1\n\n# Loop through a list\nfruits = ['apple','banana']\nfor f in fruits:\n    print(f)\n\nTry these in OuroShell!"
+    ]
+  },
+  {
+    keywords: ["function","def","lambda","return","parameter","argument"],
+    intent: "prog_func",
+    responses: [
+      "**Python Functions:**\n\ndef greet(name):\n    return f'Hello, {name}!'\n\nprint(greet('World'))\n\n# Lambda (one-liner)\nsquare = lambda x: x ** 2\nprint(square(5))  # 25\n\n# Default arguments\ndef power(base, exp=2):\n    return base ** exp\n\nPaste any of these into OuroShell!"
+    ]
+  },
+  {
+    keywords: ["list","array","append","index","slice"],
+    intent: "prog_list",
+    responses: [
+      "**Python Lists:**\n\nnums = [1, 2, 3, 4, 5]\nnums.append(6)\nnums.pop()  # removes last\n\n# Slicing\nprint(nums[1:3])  # [2, 3]\nprint(nums[-1])   # last item\n\n# List comprehension\nsquares = [x**2 for x in range(10)]"
+    ]
+  },
+  {
+    keywords: ["dictionary","dict","key","value","hash","map"],
+    intent: "prog_dict",
+    responses: [
+      "**Python Dictionaries:**\n\nuser = {\n    'name': 'Ouros',\n    'level': 42,\n    'tools': ['calc','shell']\n}\n\nprint(user['name'])\nuser['new_key'] = 'value'\n\n# Loop through\nfor k, v in user.items():\n    print(f'{k}: {v}')"
+    ]
+  },
+  {
+    keywords: ["class","object","oop","init","self","method","inheritance"],
+    intent: "prog_oop",
+    responses: [
+      "**Python Classes:**\n\nclass Robot:\n    def __init__(self, name):\n        self.name = name\n        self.energy = 100\n    \n    def greet(self):\n        return f'I am {self.name}!'\n    \n    def work(self):\n        self.energy -= 10\n\nouros = Robot('Ouros')\nprint(ouros.greet())"
+    ]
+  },
+  {
+    keywords: ["sort","sorting","bubble","merge","quick","algorithm"],
+    intent: "prog_sort",
+    responses: [
+      "**Sorting in Python:**\n\nnums = [3,1,4,1,5,9]\nnums.sort()          # in-place\nsorted(nums)         # new list\nsorted(nums, reverse=True)\n\n# Custom key\nwords = ['banana','fig','cherry']\nwords.sort(key=len)  # by length"
+    ]
+  },
+  {
+    keywords: ["string","text","format","split","join","replace"],
+    intent: "prog_string",
+    responses: [
+      "**Python Strings:**\n\ns = 'Hello Ouroboros'\n\ns.upper()          # HELLO OUROBOROS\ns.lower()          # hello ouroboros\ns.split(' ')       # ['Hello','Ouroboros']\n'-'.join(['a','b']) # 'a-b'\ns.replace('Hello','Hi')\n\n# f-strings\nname = 'Ouros'\nf'My name is {name}'"
+    ]
+  },
+  {
+    keywords: ["error","exception","try","catch","except","bug","debug"],
+    intent: "prog_error",
+    responses: [
+      "**Python Error Handling:**\n\ntry:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print('Cannot divide by zero!')\nexcept Exception as e:\n    print(f'Error: {e}')\nfinally:\n    print('This always runs')\n\nCommon errors:\n• NameError — variable not defined\n• TypeError — wrong type\n• IndexError — list index out of range"
+    ]
+  },
+  {
+    keywords: ["import","module","library","package","pip","install"],
+    intent: "prog_import",
+    responses: [
+      "**Python Imports:**\n\nimport math\nfrom random import randint\nimport json\n\nIn OuroShell, many packages work:\n• math, random, json, re\n• numpy, pandas (auto-installed)\n• sympy for symbolic math\n\nSome packages that need system access won't work in-browser."
+    ]
+  },
+  {
+    keywords: ["derivative","differentiate","calculus","integral","dx"],
+    intent: "math_calc",
+    responses: [
+      "**Calculus basics:**\n\nDerivative of x^n = n·x^(n-1)\n\nCommon derivatives:\n• d/dx(x²) = 2x\n• d/dx(sin x) = cos x\n• d/dx(eˣ) = eˣ\n• d/dx(ln x) = 1/x\n\nTry in OuroShell:\nfrom sympy import *\nx = symbols('x')\ndiff(x**2, x)  # 2*x\nintegrate(x**2, x)  # x³/3"
+    ]
+  },
+  {
+    keywords: ["matrix","matrices","linear","algebra","vector","dot"],
+    intent: "math_linear",
+    responses: [
+      "**Linear Algebra in Python:**\n\nimport numpy as np\n\nA = np.array([[1,2],[3,4]])\nB = np.array([[5,6],[7,8]])\n\nnp.dot(A, B)       # matrix multiply\nnp.linalg.det(A)   # determinant\nnp.linalg.inv(A)   # inverse\nnp.linalg.eig(A)   # eigenvalues\n\nTry it in OuroShell!"
+    ]
+  },
+  {
+    keywords: ["quadratic","formula","roots","polynomial","solve equation"],
+    intent: "math_quad",
+    responses: [
+      "**Quadratic Formula:**\nx = (-b ± √(b²-4ac)) / 2a\n\nFor ax² + bx + c = 0\n\nimport math\na, b, c = 1, -5, 6\ndisc = b**2 - 4*a*c\nx1 = (-b + math.sqrt(disc)) / (2*a)\nx2 = (-b - math.sqrt(disc)) / (2*a)\nprint(f'x = {x1} or x = {x2}')\n# x = 3.0 or x = 2.0"
+    ]
+  },
+  {
+    keywords: ["fibonacci","sequence","series","recursive","pattern"],
+    intent: "math_fib",
+    responses: [
+      "**Fibonacci:**\n0, 1, 1, 2, 3, 5, 8, 13, 21...\n\ndef fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint([fib(i) for i in range(10)])"
+    ]
+  },
+  {
+    keywords: ["prime","primes","sieve","primality"],
+    intent: "math_prime",
+    responses: [
+      "**Prime Numbers:**\n\ndef is_prime(n):\n    if n < 2: return False\n    for i in range(2, int(n**0.5)+1):\n        if n % i == 0: return False\n    return True\n\nprint([x for x in range(50) if is_prime(x)])"
+    ]
+  },
+  {
+    keywords: ["ouroboros","snake","serpent","symbol","meaning","origin"],
+    intent: "ouroboros",
+    responses: [
+      "The **Ouroboros** is an ancient symbol depicting a serpent eating its own tail.\n\n• First appeared in ancient Egypt (~1600 BC)\n• Represents infinity, cycles, and self-renewal\n• Used in alchemy, Gnosticism, and mythology\n\nThat's the philosophy behind this hub: **what you build, you return to.**",
+      "Ouroboros comes from Greek: οὐρά (tail) + βόρος (eating). It represents the infinite cycle — creation feeding back into itself."
+    ]
+  },
+  {
+    keywords: ["html","css","web","website","frontend","dom"],
+    intent: "web_dev",
+    responses: [
+      "**Web Development basics:**\n\n• **HTML** — Structure (elements, tags)\n• **CSS** — Styling (colors, layout, animation)\n• **JavaScript** — Behavior (interactivity, logic)\n\nThis entire Ouroboros Hub is built with just these three!\n\nKey concepts:\n• DOM manipulation\n• CSS Flexbox & Grid\n• Event listeners\n• Fetch API for HTTP requests"
+    ]
+  },
+  {
+    keywords: ["javascript","js","node","typescript"],
+    intent: "javascript",
+    responses: [
+      "**JavaScript essentials:**\n\nconst name = 'Ouros';\nlet count = 0;\n\nconst greet = (n) => `Hello ${n}`;\n\n[1,2,3].map(x => x*2)    // [2,4,6]\n[1,2,3].filter(x => x>1) // [2,3]\n[1,2,3].reduce((a,b) => a+b) // 6\n\nThis whole site runs on vanilla JS!"
+    ]
+  },
+  {
+    keywords: ["api","rest","fetch","http","request","endpoint"],
+    intent: "api",
+    responses: [
+      "**APIs & Fetch:**\n\nconst res = await fetch('https://api.example.com/data');\nconst data = await res.json();\n\n// POST request\nawait fetch(url, {\n  method: 'POST',\n  headers: {'Content-Type': 'application/json'},\n  body: JSON.stringify({key: 'value'})\n});\n\nREST methods: GET, POST, PUT, DELETE"
+    ]
+  },
+  {
+    keywords: ["git","github","version","commit","branch","merge"],
+    intent: "git",
+    responses: [
+      "**Git essentials:**\n\ngit init\ngit add .\ngit commit -m 'message'\ngit push origin main\ngit pull\ngit branch feature\ngit checkout feature\ngit merge feature"
+    ]
+  },
+  {
+    keywords: ["binary","hex","hexadecimal","octal","base","convert","bit"],
+    intent: "binary",
+    responses: [
+      "**Number Systems:**\n\nDecimal 42 =\n• Binary: 101010\n• Hex: 2A\n• Octal: 52\n\nPython:\nbin(42)   # '0b101010'\nhex(42)   # '0x2a'\noct(42)   # '0o52'\nint('101010', 2)  # 42"
+    ]
+  },
+  {
+    keywords: ["random","generate","uuid","seed"],
+    intent: "random",
+    responses: [
+      "**Random in Python:**\n\nimport random\n\nrandom.randint(1, 100)\nrandom.random()          # 0.0 to 1.0\nrandom.choice(['a','b'])\nrandom.shuffle(my_list)\nrandom.sample(range(100), 5)"
+    ]
+  },
+  {
+    keywords: ["regex","regular expression","pattern","match","search","re"],
+    intent: "regex",
+    responses: [
+      "**Regex in Python:**\n\nimport re\n\nre.findall(r'\\d+', 'abc 123 def 456')\n# ['123', '456']\n\nre.sub(r'\\s+', '-', 'hello world')\n# 'hello-world'\n\nCommon patterns:\n\\d = digit, \\w = word char\n\\s = whitespace, . = any\n+ = one or more, * = zero or more"
+    ]
+  },
+  {
+    keywords: ["joke","funny","laugh","humor"],
+    intent: "joke",
+    responses: [
+      "Why do programmers prefer dark mode?\nBecause light attracts bugs! 🐛",
+      "There are only 10 types of people — those who understand binary and those who don't.",
+      "A SQL query walks into a bar, sees two tables, and asks... 'Can I JOIN you?'",
+      "Why did the Python programmer break up with Java?\nToo many arguments and no class. 😄",
+      "!false — it's funny because it's true.",
+      "What's a programmer's favorite hangout? Foo Bar."
+    ]
+  },
+  {
+    keywords: ["thank","thanks","thx","appreciate","awesome","great","cool"],
+    intent: "thanks",
+    responses: [
+      "You're welcome! The cycle continues 🐍",
+      "Anytime! Keep building.",
+      "Happy to help! That's what Ouros is here for.",
+      "No problem! Ask me anything else."
+    ]
+  },
+  {
+    keywords: ["bye","goodbye","see you","later","quit","exit"],
+    intent: "bye",
+    responses: [
+      "See you next cycle! 🐍",
+      "Goodbye! Remember — what you build, you return to.",
+      "Later! The loop never really ends.",
+      "Until next time! Keep iterating. ∞"
+    ]
+  },
+  {
+    keywords: ["meaning","life","purpose","everything","42","universe"],
+    intent: "life",
+    responses: [
+      "42. Obviously.\n\nBut the real answer? Keep iterating until you find your own meaning.",
+      "The meaning of life is to build, break, and rebuild. Just like code. Just like the Ouroboros."
+    ]
+  },
+  {
+    keywords: ["bored","boring","nothing","do","suggest","idea"],
+    intent: "bored",
+    responses: [
+      "Try these:\n1. 📈 Graph sin(x) * cos(x*2) in the Canvas\n2. 🐍 Build a number guessing game in OuroShell\n3. 🎨 Draw something in Canvas draw mode\n4. 🧮 Calculate fibonacci(20) in the Calculator\n5. 🎵 Load your favorite playlist",
+      "Challenge: Try writing FizzBuzz in one line in OuroShell!\n\nprint('\\n'.join(['FizzBuzz' if i%15==0 else 'Fizz' if i%3==0 else 'Buzz' if i%5==0 else str(i) for i in range(1,101)]))"
+    ]
+  },
+  {
+    keywords: ["tip","tips","advice","trick","tricks","shortcut"],
+    intent: "tips",
+    responses: [
+      "**Ouroboros Hub Tips:**\n\n⌨️ Ctrl+Enter runs Python code\n📈 Scroll to zoom graphs, drag to pan\n🎵 Paste playlist URLs for continuous music\n🧮 The calculator handles sqrt, sin, log, etc.\n✏️ Use Draw mode for diagrams\n\n**Python Tips:**\n• Use f-strings: f'Hello {name}'\n• List comp: [x*2 for x in range(10)]\n• Ternary: 'yes' if True else 'no'"
+    ]
+  }
+];
+
+function tryMath(input){
+  try {
+    const cleaned = input.replace(/what is|what's|calculate|compute|solve|equals|=\?/gi, "").trim();
+    if(/^[\d\s\+\-\*\/\^\(\)\.\,\%\!]+$/.test(cleaned) ||
+       /^(sqrt|sin|cos|tan|log|abs|pi|e|exp|ceil|floor|round|pow|mod)\b/i.test(cleaned)){
+      const result = math.evaluate(cleaned);
+      if(typeof result === "number" || typeof result === "object"){
+        return `🧮 ${cleaned} = **${result}**`;
+      }
+    }
+    const mathMatch = input.match(/([\d\.]+)\s*([\+\-\*\/\^]|plus|minus|times|divided by|to the power of)\s*([\d\.]+)/i);
+    if(mathMatch){
+      const ops = {
+        "plus":"+", "minus":"-", "times":"*",
+        "divided by":"/", "to the power of":"^"
+      };
+      let op = mathMatch[2];
+      if(ops[op.toLowerCase()]) op = ops[op.toLowerCase()];
+      const expr = `${mathMatch[1]} ${op} ${mathMatch[3]}`;
+      const result = math.evaluate(expr);
+      return `🧮 ${expr} = **${result}**`;
+    }
+  } catch(e){}
+  return null;
+}
+
+function generateResponse(input){
+  const tokens = tokenize(input);
+  const filtered = filterTokens(tokens);
+  const lower = input.toLowerCase().trim();
+
+  const mathResult = tryMath(input);
+  if(mathResult) return mathResult;
+
+  if(conversationMemory.length > 0){
+    const lastBot = conversationMemory[conversationMemory.length - 1];
+    if(lastBot && lastBot.role === "bot"){
+      if(/^(yes|yeah|yep|sure|ok|please|go ahead)$/i.test(lower)){
+        return "Great! Go ahead and try it. If you need help with specifics, just ask!";
+      }
+      if(/^(no|nah|nope|not really)$/i.test(lower)){
+        return "No problem! What else would you like to know?";
+      }
+    }
+  }
+
+  let bestEntry = null;
+  let bestScore = 0;
+
+  for(const entry of knowledgeBase){
+    const score = enhancedSimilarity(tokens, entry.keywords);
+    if(score > bestScore){
+      bestScore = score;
+      bestEntry = entry;
+    }
+  }
+
+  if(bestEntry && bestScore > 0.3){
+    const responses = bestEntry.responses;
+    let response = responses[Math.floor(Math.random() * responses.length)];
+    if(responses.length > 1 && conversationMemory.length > 0){
+      const lastResponse = conversationMemory[conversationMemory.length - 1]?.text;
+      let attempts = 0;
+      while(response === lastResponse && attempts < 3){
+        response = responses[Math.floor(Math.random() * responses.length)];
+        attempts++;
+      }
+    }
+    return response;
+  }
+
+  if(tokens.some(t => ["how","explain","what","why","define"].includes(t))){
+    return `That's a great question about "${filtered.join(" ")}". I don't have a detailed entry for that yet, but try:\n\n• Searching in OuroShell with Python\n• Rephrasing with more specific terms\n• Asking about programming, math, or the tools here\n\nI'm always learning from our conversations!`;
+  }
+
+  if(tokens.some(t => ["make","create","build","write","generate"].includes(t))){
+    return `Sounds like a project! I can help you plan it. Tell me more about what you want to ${tokens.find(t => ["make","create","build","write","generate"].includes(t))} and I'll suggest an approach.\n\nYou can prototype in OuroShell or sketch ideas in the Canvas!`;
+  }
+
+  const fallbacks = [
+    `Interesting! I don't have a specific answer for that, but I can help with:\n• 🐍 Python & programming\n• 🧮 Math & calculations\n• 📈 Graphing & visualization\n• 🛠️ Using Ouroboros Hub tools\n\nTry rephrasing or ask about something specific!`,
+    `Hmm, that's outside my current knowledge. I work best with programming, math, and tool-related questions.\n\nFun things to try:\n• Ask me a math problem\n• Ask for a Python code example\n• Ask for a programming joke 😄`,
+    `I'm not sure about that one. As a local AI, I have focused knowledge about coding, math, and Ouroboros Hub.\n\nAsk me to explain a concept, solve math, or help with code!`,
+    `That's beyond my built-in knowledge, but I'm great with:\n• Code examples in Python & JS\n• Math concepts & computation\n• Tips for using the tools here\n\nWhat else can I help with?`
+  ];
+
+  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+}
+
+function sendMessage(){
   const text = aiInput.value.trim();
   if(!text) return;
 
   addMessage("user", text);
   aiInput.value = "";
 
+  conversationMemory.push({ role: "user", text });
+
   const aiBubble = document.createElement("div");
   aiBubble.style.background = "#0f3a4a";
   aiBubble.innerHTML = "🤖 thinking...";
   chatBox.appendChild(aiBubble);
-
-  try {
-    const res = await fetch(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          inputs: text,
-          parameters: { max_new_tokens: 200 }
-        })
-      }
-    );
-
-    const data = await res.json();
-    const reply = Array.isArray(data)
-      ? data[0]?.generated_text
-      : data.generated_text || data.error || "No response";
-
-    aiBubble.innerHTML = "🤖 " + reply;
-
-  } catch(err) {
-    aiBubble.innerHTML = "🤖 Error: " + err.message;
-  }
-
   chatBox.scrollTop = chatBox.scrollHeight;
+
+  const delay = 200 + Math.random() * 600 + text.length * 5;
+
+  setTimeout(() => {
+    const reply = generateResponse(text);
+    aiBubble.innerHTML = "🤖 " + reply
+      .replace(/\n/g, "<br>")
+      .replace(/\*\*(.*?)\*\*/g, "<strong>\$1</strong>")
+      .replace(/`(.*?)`/g, "<code style='background:#1a2235;padding:2px 6px;border-radius:4px;'>\$1</code>");
+
+    conversationMemory.push({ role: "bot", text: reply });
+
+    if(conversationMemory.length > 20){
+      conversationMemory = conversationMemory.slice(-20);
+    }
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, delay);
 }
+
+aiInput.addEventListener("keydown", (e) => {
+  if(e.key === "Enter") sendMessage();
+});
 
 /* MUSIC */
 let player;
@@ -631,6 +1281,7 @@ function togglePlay(){
 function nextVideo(){ if(playerReady) player.nextVideo(); }
 function prevVideo(){ if(playerReady) player.previousVideo(); }
 function setVolume(v){ if(playerReady) player.setVolume(v); }
+
 /* ========== VISUALIZER ========== */
 
 const eqColors = ["#38bdf8","#f472b6","#a78bfa","#34d399","#fbbf24","#fb923c"];
@@ -662,8 +1313,6 @@ function setVizMode(mode){
     else { resizeDrawCanvas(); redrawDrawCanvas(); }
   }, 20);
 }
-
-/* ---- GRAPH MODE ---- */
 
 let graphXMin = -10, graphXMax = 10, graphYMin = -7, graphYMax = 7;
 
@@ -725,7 +1374,6 @@ function drawGraph(){
   function toScreenX(x){ return (x - graphXMin) / (graphXMax - graphXMin) * w; }
   function toScreenY(y){ return h - (y - graphYMin) / (graphYMax - graphYMin) * h; }
 
-  // Grid
   ctx.strokeStyle = "#1e293b";
   ctx.lineWidth = 1;
 
@@ -742,7 +1390,6 @@ function drawGraph(){
     ctx.stroke();
   }
 
-  // Axes
   ctx.strokeStyle = "#475569";
   ctx.lineWidth = 2;
 
@@ -756,7 +1403,6 @@ function drawGraph(){
   ctx.lineTo(w, toScreenY(0));
   ctx.stroke();
 
-  // Axis labels
   ctx.fillStyle = "#64748b";
   ctx.font = "11px sans-serif";
   ctx.textAlign = "center";
@@ -772,7 +1418,6 @@ function drawGraph(){
     ctx.fillText(y, toScreenX(0) - 6, toScreenY(y) + 4);
   }
 
-  // Plot equations
   equations.forEach(eq => {
     if(!eq.expr.trim()) return;
 
@@ -805,7 +1450,6 @@ function drawGraph(){
   });
 }
 
-// Zoom with scroll
 document.getElementById("graphCanvas").addEventListener("wheel", (e) => {
   e.preventDefault();
   const factor = e.deltaY > 0 ? 1.1 : 0.9;
@@ -818,7 +1462,6 @@ document.getElementById("graphCanvas").addEventListener("wheel", (e) => {
   drawGraph();
 });
 
-// Pan with drag
 let graphDragging = false, graphLastX, graphLastY;
 
 document.getElementById("graphCanvas").addEventListener("mousedown", (e) => {
@@ -842,7 +1485,6 @@ document.getElementById("graphCanvas").addEventListener("mousemove", (e) => {
 document.getElementById("graphCanvas").addEventListener("mouseup", () => { graphDragging = false; });
 document.getElementById("graphCanvas").addEventListener("mouseleave", () => { graphDragging = false; });
 
-
 /* ---- DRAW MODE ---- */
 
 let drawTool = "brush";
@@ -854,12 +1496,10 @@ let drawCurrent = null;
 function resizeDrawCanvas(){
   const c = document.getElementById("drawCanvas");
   if(c.width !== c.clientWidth || c.height !== c.clientHeight){
-    // Save current image
     const img = c.toDataURL();
     c.width = c.clientWidth;
     c.height = c.clientHeight;
 
-    // Restore
     const i = new Image();
     i.onload = () => { c.getContext("2d").drawImage(i, 0, 0); };
     i.src = img;
@@ -923,7 +1563,6 @@ function clearCanvas(){
 }
 
 function redrawDrawCanvas(){
-  // just ensure white background if empty
   const c = document.getElementById("drawCanvas");
   const ctx = c.getContext("2d");
   if(drawHistory.length === 0){
@@ -972,7 +1611,6 @@ dc.addEventListener("mousemove", (e) => {
     return;
   }
 
-  // For shapes, redraw from last saved state
   if(drawHistory.length > 0){
     const c = document.getElementById("drawCanvas");
     const ctx = c.getContext("2d");
@@ -1008,10 +1646,8 @@ function drawShapePreview(ctx, mx, my){
     ctx.moveTo(drawStartX, drawStartY);
     ctx.lineTo(mx, my);
     ctx.stroke();
-
   } else if(drawTool === "rect"){
     ctx.strokeRect(drawStartX, drawStartY, mx - drawStartX, my - drawStartY);
-
   } else if(drawTool === "circle"){
     const rx = Math.abs(mx - drawStartX) / 2;
     const ry = Math.abs(my - drawStartY) / 2;
@@ -1022,10 +1658,10 @@ function drawShapePreview(ctx, mx, my){
   }
 }
 
-// Handle window resize
 window.addEventListener("resize", () => {
   if(vizMode === "graph"){ resizeGraphCanvas(); drawGraph(); }
 });
+
 /* PARTICLES */
 const particleCanvas = document.createElement("canvas");
 particleCanvas.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;";
@@ -1071,7 +1707,7 @@ function drawParticles(){
 initParticles();
 drawParticles();
 window.addEventListener("resize", initParticles);
-</script>
 
+</script>
 </body>
 </html>
