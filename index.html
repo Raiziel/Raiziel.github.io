@@ -57,11 +57,10 @@
       flex: 1;
       padding: 2rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
       gap: 1.5rem;
       justify-content: center;
     }
-
 
     .card {
       background: var(--card);
@@ -111,6 +110,9 @@
       grid-column: 1 / -1;
       text-align: center;
       margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .hero h2 {
@@ -136,6 +138,42 @@
     button:hover {
       opacity: 0.9;
     }
+
+    /* Calculator Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    #calcInput {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      margin: 1rem 0;
+      font-size: 1rem;
+    }
+
+    #calcOutput p {
+      margin: 0.5rem 0;
+    }
   </style>
 </head>
 
@@ -157,9 +195,9 @@
     <button onclick="randomGreeting()">Click Me</button>
   </div>
 
-  <div class="card">
+  <div class="card" onclick="openCalculator()">
     <h2>Calculator</h2>
-    <p>Basic math tools coming soon.</p>
+    <p>Evaluate expressions and explore math.</p>
   </div>
 
   <div class="card">
@@ -176,12 +214,23 @@
     <h2>Sandbox</h2>
     <p>Test ideas and experiments.</p>
   </div>
-
 </main>
+
+<!-- Calculator Modal -->
+<div id="calcModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Calculator</h2>
+    <input id="calcInput" placeholder="Try: 2+2, sqrt(16), sin(pi/2)" />
+    <div id="calcOutput"></div>
+    <button onclick="closeCalculator()">Close</button>
+  </div>
+</div>
 
 <footer>
   © 2026 My Utility Hub
 </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 
 <script>
   function randomGreeting() {
@@ -193,6 +242,39 @@
       "Small steps → big systems."
     ];
     alert(messages[Math.floor(Math.random() * messages.length)]);
+  }
+
+  function openCalculator() {
+    document.getElementById("calcModal").classList.remove("hidden");
+    document.getElementById("calcInput").focus();
+  }
+
+  function closeCalculator() {
+    document.getElementById("calcModal").classList.add("hidden");
+  }
+
+  const input = document.getElementById("calcInput");
+  const output = document.getElementById("calcOutput");
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      handleInput(input.value);
+    }
+  });
+
+  function handleInput(value) {
+    try {
+      const result = math.evaluate(value);
+
+      output.innerHTML = `
+        <div>
+          <p><strong>Input:</strong> ${value}</p>
+          <p><strong>Result:</strong> ${result}</p>
+        </div>
+      `;
+    } catch {
+      output.innerHTML = `<p>Couldn't understand that.</p>`;
+    }
   }
 </script>
 
