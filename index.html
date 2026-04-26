@@ -6,9 +6,6 @@
   <title>Ouroboros</title>
   <link rel="icon" type="image/png" href="Ouroboros.png">
 
-  <!-- CodeMirror -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-
   <style>
     :root {
       --bg: #0f172a;
@@ -92,8 +89,13 @@
       margin-bottom: 1rem;
     }
 
-    .hero h2 { font-size: 2rem; }
-    .hero span { color: var(--accent); }
+    .hero h2 {
+      font-size: 2rem;
+    }
+
+    .hero span {
+      color: var(--accent);
+    }
 
     button {
       margin-top: 1rem;
@@ -124,39 +126,25 @@
       max-width: 600px;
     }
 
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      margin: 0.5rem 0;
+    }
+
     pre {
       margin-top: 1rem;
       white-space: pre-wrap;
-      overflow-x: auto;
-      max-height: 250px;
-      overflow-y: auto;
     }
 
-    /* =========================
-       CODEMIRROR FIX (IMPORTANT)
-    ========================= */
-
-    .CodeMirror {
-      height: 220px;
-      border-radius: 10px;
-      font-size: 14px;
-      line-height: 1.5;
+    #chatBox div {
+      margin: 6px 0;
+      padding: 8px;
+      border-radius: 8px;
+      max-width: 80%;
     }
-
-    .CodeMirror-gutters {
-      background: #0b1220;
-      border-right: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .CodeMirror-linenumber {
-      color: var(--muted);
-      padding-right: 8px;
-    }
-
-    .CodeMirror-sizer {
-      margin-left: 8px !important;
-    }
-
   </style>
 </head>
 
@@ -180,6 +168,17 @@
   <div class="hero">
     <h2>Build. <span>Experiment.</span> Expand.</h2>
     <p>What you build, you return to.</p>
+    <button onclick="randomGreeting()">Click Me</button>
+  </div>
+
+  <div class="card" onclick="openCalculator()">
+    <h2>Calculator</h2>
+    <p>Evaluate expressions and explore math.</p>
+  </div>
+
+  <div class="card">
+    <h2>Visualizer</h2>
+    <p>Graphs and interactive tools.</p>
   </div>
 
   <div class="card" onclick="openMusic()">
@@ -192,19 +191,47 @@
     <p>Run Python code in-browser.</p>
   </div>
 
+  <div class="card" onclick="openAI()">
+    <h2>Ouros</h2>
+    <p>Ask anything!</p>
+  </div>
+
 </main>
 
-<!-- PYTHON -->
+<!-- Calculator -->
+<div id="calcModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Calculator</h2>
+    <input id="calcInput" placeholder="2+2, sqrt(16)" />
+    <div id="calcOutput"></div>
+    <button onclick="closeCalculator()">Close</button>
+  </div>
+</div>
+
+<!-- Python -->
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
     <h2>Python Terminal</h2>
-
     <textarea id="pyInput">print("Hello Ouroboros")</textarea>
-
     <button onclick="runPython()">Run</button>
     <button onclick="closePython()">Close</button>
-
     <pre id="pyOutput"></pre>
+  </div>
+</div>
+
+<!-- AI -->
+<div id="aiModal" class="modal hidden">
+  <div class="modal-content" style="display:flex; flex-direction:column; height:70vh;">
+    <h2>OuroMind</h2>
+
+    <div id="chatBox" style="flex:1; overflow-y:auto; padding:10px; background:#0b1220; border-radius:10px;"></div>
+
+    <div style="display:flex; gap:10px;">
+      <input id="aiInput" placeholder="Ask something..." style="flex:1; padding:10px;">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <button onclick="closeAI()" style="margin-top:10px;">Close</button>
   </div>
 </div>
 
@@ -225,26 +252,132 @@
     </div>
 
     <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)">
+
     <button onclick="closeMusic()">Close</button>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* =========================
-   MUSIC (UNCHANGED WORKING)
-========================= */
+/* HERO */
+function randomGreeting(){
+  const msgs=["Keep building.","You're close.","Nice work.","Systems grow from this."];
+  alert(msgs[Math.floor(Math.random()*msgs.length)]);
+}
 
+/* CALC */
+function openCalculator(){calcModal.classList.remove("hidden")}
+function closeCalculator(){calcModal.classList.add("hidden")}
+
+calcInput.onkeydown=e=>{
+  if(e.key==="Enter"){
+    try{calcOutput.innerHTML=math.evaluate(calcInput.value);}
+    catch{calcOutput.innerHTML="Error";}
+  }
+};
+
+/* PYTHON */
+let pyodide;
+loadPyodide().then(p=>pyodide=p);
+
+function openPython(){pyModal.classList.remove("hidden")}
+function closePython(){pyModal.classList.add("hidden")}
+
+async function runPython(){
+  await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout=StringIO()
+sys.stderr=sys.stdout
+  `);
+
+  await pyodide.runPythonAsync(pyInput.value);
+  pyOutput.textContent=await pyodide.runPythonAsync("sys.stdout.getvalue()");
+}
+
+/* AI (REAL NO-KEY MODEL) */
+function openAI(){aiModal.classList.remove("hidden")}
+function closeAI(){aiModal.classList.add("hidden")}
+
+const chatBox=document.getElementById("chatBox");
+const aiInput=document.getElementById("aiInput");
+
+function addMessage(role,text){
+  const div=document.createElement("div");
+
+  if(role==="user"){
+    div.style.background="#1e293b";
+    div.style.marginLeft="auto";
+    div.innerHTML="🧑 "+text;
+  }else{
+    div.style.background="#0f3a4a";
+    div.innerHTML="🤖 "+text;
+  }
+
+  chatBox.appendChild(div);
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+async function sendMessage(){
+  const text=aiInput.value.trim();
+  if(!text)return;
+
+  addMessage("user",text);
+  aiInput.value="";
+
+  const aiBubble=document.createElement("div");
+  aiBubble.style.background="#0f3a4a";
+  aiBubble.innerHTML="🤖 thinking...";
+  chatBox.appendChild(aiBubble);
+
+  try{
+    const res=await fetch(
+      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+      {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          inputs:text,
+          parameters:{max_new_tokens:200}
+        })
+      }
+    );
+
+    const data=await res.json();
+
+    const reply=Array.isArray(data)
+      ?data[0]?.generated_text
+      :data.generated_text||data.error||"No response";
+
+    aiBubble.innerHTML="🤖 "+reply;
+
+  }catch(err){
+    aiBubble.innerHTML="🤖 Error: "+err.message;
+  }
+
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+/* MUSIC */
 let player;
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
+  
+function enableClickOutsideClose(modalId) {
+  const modal = document.getElementById(modalId);
+
+  modal.addEventListener("click", (e) => {
+    // only close if user clicked the backdrop, not the window content
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+    }
+  });
+}
 
 function getVideoID(url){
   const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
@@ -257,11 +390,11 @@ function getPlaylistID(url){
 }
 
 function onYouTubeIframeAPIReady(){
-  player=new YT.Player("player",{height:"260",width:"100%",videoId:""});
+  player=new YT.Player("player",{height:"250",width:"100%",videoId:""});
 }
 
 function loadMedia(){
-  const url=document.getElementById("ytInput").value;
+  const url=ytInput.value;
   const list=getPlaylistID(url);
 
   if(list) player.loadPlaylist({listType:"playlist",list});
@@ -269,63 +402,22 @@ function loadMedia(){
 }
 
 function togglePlay(){
-  if(player.getPlayerState()===1) player.pauseVideo();
-  else player.playVideo();
+  player.getPlayerState()===1?player.pauseVideo():player.playVideo();
 }
-
 function nextVideo(){player.nextVideo()}
 function prevVideo(){player.previousVideo()}
 function setVolume(v){player.setVolume(v)}
-
-
-/* =========================
-   PYTHON (CODEMIRROR FIXED)
-========================= */
-
-let pyodide;
-let editor;
-
-loadPyodide().then(p => pyodide = p);
-
-function openPython(){pyModal.classList.remove("hidden")}
-function closePython(){pyModal.classList.add("hidden")}
-
-window.addEventListener("load", () => {
-  editor = CodeMirror.fromTextArea(document.getElementById("pyInput"), {
-    mode: "python",
-    lineNumbers: true,
-    matchBrackets: true,
-    indentUnit: 4,
-    tabSize: 4,
-    extraKeys: {
-      "Tab": cm => cm.replaceSelection("    "),
-      "Ctrl-Enter": runPython
-    }
-  });
-});
-
-async function runPython(){
-  try {
-    await pyodide.runPythonAsync(`
-import sys
-from io import StringIO
-sys.stdout = StringIO()
-sys.stderr = sys.stdout
-    `);
-
-    const code = editor.getValue();
-
-    await pyodide.runPythonAsync(code);
-
-    const out = await pyodide.runPythonAsync("sys.stdout.getvalue()");
-    pyOutput.textContent = out || "Executed (no output)";
-
-  } catch (err) {
-    pyOutput.textContent = "❌ Python Error:\n" + err;
-  }
-}
+  
+enableClickOutsideClose("calcModal");
+enableClickOutsideClose("pyModal");
+enableClickOutsideClose("musicModal");
+enableClickOutsideClose("aiModal");
 
 </script>
 
 </body>
 </html>
+
+into this 
+
+can you do that for me and make sure that you dont modify any of my code functionality
