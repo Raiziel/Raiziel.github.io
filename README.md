@@ -12,7 +12,7 @@ No accounts. No installs. No cloud dependency.
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-[Live Demo](#) · [Report Bug](https://github.com/yourusername/ouroboros/issues) · [Request Feature](https://github.com/yourusername/ouroboros/issues)
+
 
 </div>
 
