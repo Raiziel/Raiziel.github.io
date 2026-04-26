@@ -269,6 +269,7 @@
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
     <h2>Python Terminal</h2>
+    <textarea id="pyInput"></textarea>
     <button onclick="runPython()">Run</button>
     <button onclick="closePython()">Close</button>
     <pre id="pyOutput"></pre>
@@ -342,7 +343,12 @@ let editor;
 
 loadPyodide().then(p => pyodide = p);
 
-function openPython(){ pyModal.classList.remove("hidden"); }
+function openPython(){
+  pyModal.classList.remove("hidden");
+  if(editor) {
+    setTimeout(() => editor.refresh(), 10);
+  }
+}
 function closePython(){ pyModal.classList.add("hidden"); }
 
 window.addEventListener("load", () => {
