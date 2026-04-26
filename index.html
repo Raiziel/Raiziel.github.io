@@ -71,6 +71,66 @@
     nav a:hover {
       color: var(--accent);
     }
+    /* Visualizer toolbar buttons */
+.tool-btn {
+  padding: 0.4rem 0.6rem;
+  font-size: 13px;
+  background: #1e293b;
+  color: var(--text);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.tool-btn:hover {
+  background: #334155;
+}
+
+.active-tool {
+  background: var(--accent) !important;
+  color: #000 !important;
+  border-color: var(--accent) !important;
+}
+
+/* Equation row */
+.eq-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.eq-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0b1220;
+  color: var(--text);
+  font-size: 14px;
+  margin: 0;
+}
+
+.eq-color {
+  width: 24px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.eq-remove {
+  background: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 0;
+}
 
     main {
       flex: 1;
@@ -248,10 +308,10 @@
     <p>Ask your questions here!</p>
   </div>
 
-    <div class="card">
-    <h2>Visualizer</h2>
-    <p>Graphs and interactive tools.</p>
-  </div>
+ <div class="card" onclick="openVisualizer()">
+   <h2>Visualizer</h2>
+   <p>Graph functions or draw freely.</p>
+ </div>
 
 </main>
 
@@ -313,11 +373,66 @@
     <button onclick="closeMusic()">Close</button>
   </div>
 </div>
+<!-- VISUALIZER -->
+<div id="vizModal" class="modal hidden">
+  <div class="modal-content" style="max-width:900px; height:85vh; display:flex; flex-direction:column; padding:1rem;">
+
+    <!-- Mode Toggle -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h2 id="vizTitle">📈 Graph Mode</h2>
+      <div>
+        <button onclick="setVizMode('graph')" id="btnGraph" style="background:#38bdf8;">Graph</button>
+        <button onclick="setVizMode('draw')" id="btnDraw" style="background:#475569;">Draw</button>
+        <button onclick="closeVisualizer()">Close</button>
+      </div>
+    </div>
+
+    <!-- GRAPH MODE -->
+    <div id="graphMode" style="flex:1; display:flex; flex-direction:column;">
+      <div id="eqList" style="margin-bottom:8px;"></div>
+      <button onclick="addEquation()" style="width:fit-content; margin-bottom:8px;">+ Add Equation</button>
+      <canvas id="graphCanvas" style="flex:1; width:100%; background:#0b1220; border-radius:10px; cursor:crosshair;"></canvas>
+    </div>
+
+    <!-- DRAW MODE -->
+    <div id="drawMode" style="flex:1; display:none; flex-direction:column;">
+
+      <!-- Toolbar -->
+      <div id="drawToolbar" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; padding:8px; background:#0f172a; border-radius:10px;">
+
+        <label style="color:var(--muted); font-size:13px;">Tool:</label>
+        <button onclick="setDrawTool('brush')" class="tool-btn active-tool" id="tbBrush">✏️ Brush</button>
+        <button onclick="setDrawTool('eraser')" class="tool-btn" id="tbEraser">🧽 Eraser</button>
+        <button onclick="setDrawTool('line')" class="tool-btn" id="tbLine">📏 Line</button>
+        <button onclick="setDrawTool('rect')" class="tool-btn" id="tbRect">▭ Rect</button>
+        <button onclick="setDrawTool('circle')" class="tool-btn" id="tbCircle">◯ Circle</button>
+        <button onclick="setDrawTool('text')" class="tool-btn" id="tbText">T Text</button>
+
+        <span style="color:#334155;">|</span>
+
+        <label style="color:var(--muted); font-size:13px;">Color:</label>
+        <input type="color" id="drawColor" value="#38bdf8" style="width:32px; height:32px; border:none; padding:0; cursor:pointer;">
+
+        <label style="color:var(--muted); font-size:13px;">Size:</label>
+        <input type="range" id="brushSize" min="1" max="30" value="3" style="width:80px;">
+        <span id="sizeLabel" style="color:var(--muted); font-size:13px;">3</span>
+
+        <span style="color:#334155;">|</span>
+
+        <button onclick="undoDraw()">↩ Undo</button>
+        <button onclick="clearCanvas()">🗑 Clear</button>
+      </div>
+
+      <canvas id="drawCanvas" style="flex:1; width:100%; background:#ffffff; border-radius:10px; cursor:crosshair;"></canvas>
+    </div>
+
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
-
+  
 <script>
 
 /* HERO */
@@ -508,6 +623,401 @@ function togglePlay(){
 function nextVideo(){ if(playerReady) player.nextVideo(); }
 function prevVideo(){ if(playerReady) player.previousVideo(); }
 function setVolume(v){ if(playerReady) player.setVolume(v); }
+/* ========== VISUALIZER ========== */
+
+const eqColors = ["#38bdf8","#f472b6","#a78bfa","#34d399","#fbbf24","#fb923c"];
+let equations = [];
+let vizMode = "graph";
+
+function openVisualizer(){
+  vizModal.classList.remove("hidden");
+  setTimeout(() => {
+    resizeGraphCanvas();
+    resizeDrawCanvas();
+    if(equations.length === 0) addEquation();
+    drawGraph();
+  }, 20);
+}
+
+function closeVisualizer(){ vizModal.classList.add("hidden"); }
+
+function setVizMode(mode){
+  vizMode = mode;
+  document.getElementById("graphMode").style.display = mode === "graph" ? "flex" : "none";
+  document.getElementById("drawMode").style.display = mode === "draw" ? "flex" : "none";
+  document.getElementById("btnGraph").style.background = mode === "graph" ? "#38bdf8" : "#475569";
+  document.getElementById("btnDraw").style.background = mode === "draw" ? "#38bdf8" : "#475569";
+  document.getElementById("vizTitle").textContent = mode === "graph" ? "📈 Graph Mode" : "🎨 Draw Mode";
+
+  setTimeout(() => {
+    if(mode === "graph"){ resizeGraphCanvas(); drawGraph(); }
+    else { resizeDrawCanvas(); redrawDrawCanvas(); }
+  }, 20);
+}
+
+/* ---- GRAPH MODE ---- */
+
+let graphXMin = -10, graphXMax = 10, graphYMin = -7, graphYMax = 7;
+
+function resizeGraphCanvas(){
+  const c = document.getElementById("graphCanvas");
+  c.width = c.clientWidth;
+  c.height = c.clientHeight;
+}
+
+function addEquation(){
+  const idx = equations.length;
+  const color = eqColors[idx % eqColors.length];
+  equations.push({ expr: "", color });
+
+  const row = document.createElement("div");
+  row.className = "eq-row";
+  row.id = "eqRow" + idx;
+  row.innerHTML = `
+    <input type="color" class="eq-color" value="${color}" onchange="equations[${idx}].color=this.value; drawGraph();">
+    <span style="color:var(--muted); font-size:14px;">y =</span>
+    <input type="text" placeholder="x^2, sin(x), 2*x+1..." oninput="equations[${idx}].expr=this.value; drawGraph();">
+    <button class="eq-remove" onclick="removeEquation(${idx})">✕</button>
+  `;
+  document.getElementById("eqList").appendChild(row);
+}
+
+function removeEquation(idx){
+  equations.splice(idx, 1);
+  rebuildEqList();
+  drawGraph();
+}
+
+function rebuildEqList(){
+  const list = document.getElementById("eqList");
+  list.innerHTML = "";
+  equations.forEach((eq, i) => {
+    const row = document.createElement("div");
+    row.className = "eq-row";
+    row.id = "eqRow" + i;
+    row.innerHTML = `
+      <input type="color" class="eq-color" value="${eq.color}" onchange="equations[${i}].color=this.value; drawGraph();">
+      <span style="color:var(--muted); font-size:14px;">y =</span>
+      <input type="text" value="${eq.expr}" placeholder="x^2, sin(x), 2*x+1..." oninput="equations[${i}].expr=this.value; drawGraph();">
+      <button class="eq-remove" onclick="removeEquation(${i})">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function drawGraph(){
+  const c = document.getElementById("graphCanvas");
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#0b1220";
+  ctx.fillRect(0, 0, w, h);
+
+  function toScreenX(x){ return (x - graphXMin) / (graphXMax - graphXMin) * w; }
+  function toScreenY(y){ return h - (y - graphYMin) / (graphYMax - graphYMin) * h; }
+
+  // Grid
+  ctx.strokeStyle = "#1e293b";
+  ctx.lineWidth = 1;
+
+  for(let x = Math.ceil(graphXMin); x <= graphXMax; x++){
+    ctx.beginPath();
+    ctx.moveTo(toScreenX(x), 0);
+    ctx.lineTo(toScreenX(x), h);
+    ctx.stroke();
+  }
+  for(let y = Math.ceil(graphYMin); y <= graphYMax; y++){
+    ctx.beginPath();
+    ctx.moveTo(0, toScreenY(y));
+    ctx.lineTo(w, toScreenY(y));
+    ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = "#475569";
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(toScreenX(0), 0);
+  ctx.lineTo(toScreenX(0), h);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, toScreenY(0));
+  ctx.lineTo(w, toScreenY(0));
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = "#64748b";
+  ctx.font = "11px sans-serif";
+  ctx.textAlign = "center";
+
+  for(let x = Math.ceil(graphXMin); x <= graphXMax; x++){
+    if(x === 0) continue;
+    ctx.fillText(x, toScreenX(x), toScreenY(0) + 14);
+  }
+
+  ctx.textAlign = "right";
+  for(let y = Math.ceil(graphYMin); y <= graphYMax; y++){
+    if(y === 0) continue;
+    ctx.fillText(y, toScreenX(0) - 6, toScreenY(y) + 4);
+  }
+
+  // Plot equations
+  equations.forEach(eq => {
+    if(!eq.expr.trim()) return;
+
+    ctx.strokeStyle = eq.color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+
+    let started = false;
+    const steps = w * 2;
+
+    for(let i = 0; i <= steps; i++){
+      const x = graphXMin + (graphXMax - graphXMin) * i / steps;
+      try {
+        const y = math.evaluate(eq.expr, { x });
+        if(typeof y !== "number" || !isFinite(y)){
+          started = false;
+          continue;
+        }
+        const sx = toScreenX(x);
+        const sy = toScreenY(y);
+
+        if(!started){ ctx.moveTo(sx, sy); started = true; }
+        else { ctx.lineTo(sx, sy); }
+
+      } catch(e){
+        started = false;
+      }
+    }
+    ctx.stroke();
+  });
+}
+
+// Zoom with scroll
+document.getElementById("graphCanvas").addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 1.1 : 0.9;
+  const cx = (graphXMax + graphXMin) / 2;
+  const cy = (graphYMax + graphYMin) / 2;
+  const hw = (graphXMax - graphXMin) / 2 * factor;
+  const hh = (graphYMax - graphYMin) / 2 * factor;
+  graphXMin = cx - hw; graphXMax = cx + hw;
+  graphYMin = cy - hh; graphYMax = cy + hh;
+  drawGraph();
+});
+
+// Pan with drag
+let graphDragging = false, graphLastX, graphLastY;
+
+document.getElementById("graphCanvas").addEventListener("mousedown", (e) => {
+  graphDragging = true;
+  graphLastX = e.offsetX;
+  graphLastY = e.offsetY;
+});
+
+document.getElementById("graphCanvas").addEventListener("mousemove", (e) => {
+  if(!graphDragging) return;
+  const c = document.getElementById("graphCanvas");
+  const dx = (e.offsetX - graphLastX) / c.width * (graphXMax - graphXMin);
+  const dy = (e.offsetY - graphLastY) / c.height * (graphYMax - graphYMin);
+  graphXMin -= dx; graphXMax -= dx;
+  graphYMin += dy; graphYMax += dy;
+  graphLastX = e.offsetX;
+  graphLastY = e.offsetY;
+  drawGraph();
+});
+
+document.getElementById("graphCanvas").addEventListener("mouseup", () => { graphDragging = false; });
+document.getElementById("graphCanvas").addEventListener("mouseleave", () => { graphDragging = false; });
+
+
+/* ---- DRAW MODE ---- */
+
+let drawTool = "brush";
+let drawing = false;
+let drawStartX, drawStartY;
+let drawHistory = [];
+let drawCurrent = null;
+
+function resizeDrawCanvas(){
+  const c = document.getElementById("drawCanvas");
+  if(c.width !== c.clientWidth || c.height !== c.clientHeight){
+    // Save current image
+    const img = c.toDataURL();
+    c.width = c.clientWidth;
+    c.height = c.clientHeight;
+
+    // Restore
+    const i = new Image();
+    i.onload = () => { c.getContext("2d").drawImage(i, 0, 0); };
+    i.src = img;
+  }
+}
+
+function setDrawTool(tool){
+  drawTool = tool;
+  document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active-tool"));
+  const id = "tb" + tool.charAt(0).toUpperCase() + tool.slice(1);
+  const btn = document.getElementById(id);
+  if(btn) btn.classList.add("active-tool");
+
+  const c = document.getElementById("drawCanvas");
+  c.style.cursor = tool === "text" ? "text" : "crosshair";
+}
+
+document.getElementById("brushSize").addEventListener("input", function(){
+  document.getElementById("sizeLabel").textContent = this.value;
+});
+
+function getDrawCtx(){
+  return document.getElementById("drawCanvas").getContext("2d");
+}
+
+function getDrawColor(){
+  return drawTool === "eraser" ? "#ffffff" : document.getElementById("drawColor").value;
+}
+
+function getSize(){
+  return parseInt(document.getElementById("brushSize").value);
+}
+
+function saveState(){
+  const c = document.getElementById("drawCanvas");
+  drawHistory.push(c.toDataURL());
+  if(drawHistory.length > 50) drawHistory.shift();
+}
+
+function undoDraw(){
+  if(drawHistory.length === 0) return;
+  const c = document.getElementById("drawCanvas");
+  const ctx = c.getContext("2d");
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0);
+  };
+  img.src = drawHistory.pop();
+}
+
+function clearCanvas(){
+  saveState();
+  const c = document.getElementById("drawCanvas");
+  const ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, c.width, c.height);
+}
+
+function redrawDrawCanvas(){
+  // just ensure white background if empty
+  const c = document.getElementById("drawCanvas");
+  const ctx = c.getContext("2d");
+  if(drawHistory.length === 0){
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, c.width, c.height);
+  }
+}
+
+const dc = document.getElementById("drawCanvas");
+
+dc.addEventListener("mousedown", (e) => {
+  if(drawTool === "text"){
+    const text = prompt("Enter text:");
+    if(!text) return;
+    saveState();
+    const ctx = getDrawCtx();
+    ctx.fillStyle = getDrawColor();
+    ctx.font = `${getSize() + 12}px sans-serif`;
+    ctx.fillText(text, e.offsetX, e.offsetY);
+    return;
+  }
+
+  drawing = true;
+  drawStartX = e.offsetX;
+  drawStartY = e.offsetY;
+  saveState();
+
+  if(drawTool === "brush" || drawTool === "eraser"){
+    const ctx = getDrawCtx();
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = getDrawColor();
+    ctx.lineWidth = getSize();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+});
+
+dc.addEventListener("mousemove", (e) => {
+  if(!drawing) return;
+
+  if(drawTool === "brush" || drawTool === "eraser"){
+    const ctx = getDrawCtx();
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    return;
+  }
+
+  // For shapes, redraw from last saved state
+  if(drawHistory.length > 0){
+    const c = document.getElementById("drawCanvas");
+    const ctx = c.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0);
+      drawShapePreview(ctx, e.offsetX, e.offsetY);
+    };
+    img.src = drawHistory[drawHistory.length - 1];
+  }
+});
+
+dc.addEventListener("mouseup", (e) => {
+  if(!drawing) return;
+  drawing = false;
+
+  if(drawTool === "line" || drawTool === "rect" || drawTool === "circle"){
+    const ctx = getDrawCtx();
+    drawShapePreview(ctx, e.offsetX, e.offsetY);
+  }
+});
+
+dc.addEventListener("mouseleave", () => { drawing = false; });
+
+function drawShapePreview(ctx, mx, my){
+  ctx.strokeStyle = getDrawColor();
+  ctx.lineWidth = getSize();
+  ctx.lineCap = "round";
+  ctx.beginPath();
+
+  if(drawTool === "line"){
+    ctx.moveTo(drawStartX, drawStartY);
+    ctx.lineTo(mx, my);
+    ctx.stroke();
+
+  } else if(drawTool === "rect"){
+    ctx.strokeRect(drawStartX, drawStartY, mx - drawStartX, my - drawStartY);
+
+  } else if(drawTool === "circle"){
+    const rx = Math.abs(mx - drawStartX) / 2;
+    const ry = Math.abs(my - drawStartY) / 2;
+    const cx = (drawStartX + mx) / 2;
+    const cy = (drawStartY + my) / 2;
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// Handle window resize
+window.addEventListener("resize", () => {
+  if(vizMode === "graph"){ resizeGraphCanvas(); drawGraph(); }
+});
 
 </script>
 
