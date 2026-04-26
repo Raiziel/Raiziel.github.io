@@ -181,12 +181,13 @@
     .CodeMirror-cursor {
       border-left: 1px solid #e2e8f0;
     }
-    /* FIX: Restore CodeMirror's expected box model */
+
+  .CodeMirror,
   .CodeMirror *,
   .CodeMirror *::before,
   .CodeMirror *::after {
-    box-sizing: content-box;
-}
+    box-sizing: content-box !important;
+  }
 
     /* FIX: output stays inside modal */
     #pyOutput {
@@ -268,7 +269,6 @@
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
     <h2>Python Terminal</h2>
-    <textarea id="pyInput">print("Hello Ouroboros")</textarea>
     <button onclick="runPython()">Run</button>
     <button onclick="closePython()">Close</button>
     <pre id="pyOutput"></pre>
