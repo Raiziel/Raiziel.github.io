@@ -12,107 +12,26 @@ No accounts. No installs. No cloud dependency.
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-
-
 </div>
 
 ---
 
-## 📖 About
+## About
 
-**Ouroboros** is an all-in-one productivity hub that runs entirely in your browser. Named after the ancient serpent that consumes itself to be reborn, it embodies the philosophy that every ending fuels a new beginning — what you build here, you return to.
+Ouroboros is an all-in-one productivity hub that runs entirely in your browser.
 
-Every tool is client-side. Your data never leaves your machine.
-
----
-
-## ✨ Features
-
-|
- Tool 
-|
- Description 
-|
-|
-------
-|
--------------
-|
-|
- 🧮 
-**
-Calculator
-**
-|
- Evaluate expressions, derivatives (
-`d/dx`
-), second derivatives (
-`d²/dx²`
-), definite integrals (
-`∫(expr, a, b)`
-), and indefinite integrals — powered by 
-[
-math.js
-](
-https://mathjs.org/
-)
-|
-|
- 🐍 
-**
-OuroShell
-**
-|
- Full Python 3 terminal in-browser via 
-[
-Pyodide
-](
-https://pyodide.org/
-)
-. Supports numpy, pandas, sympy, and more. Syntax-highlighted with 
-[
-CodeMirror
-](
-https://codemirror.net/
-)
-|
-|
- 🤖 
-**
-Ouros AI
-**
-|
- A local AI chatbot built entirely in JavaScript. Uses tokenization, cosine similarity, fuzzy matching, and a curated knowledge base — zero API calls 
-|
-|
- 📈 
-**
-Canvas: Graph Mode
-**
-|
- Plot equations like Desmos. Supports 
-`sin(x)`
-, 
-`x^2`
-, 
-`2*x+1`
-, etc. Scroll to zoom, drag to pan, multiple equations with custom colors 
-|
-|
- 🎨 
-**
-Canvas: Draw Mode
-**
-|
- Freehand drawing with brush, eraser, line, rectangle, circle, and text tools. Includes color picker, size control, undo, and clear 
-|
-|
- 🎵 
-**
-Music Player
-**
-|
- Paste any YouTube video or playlist URL. Play/pause, skip, and volume control via the YouTube IFrame API 
-|
+Everything is client-side.
 
 ---
+
+## Features
+
+🧮 **Calculator** — Expressions, derivatives, integrals powered by math.js
+
+🐍 **OuroShell** — Full Python 3 in-browser via Pyodide with CodeMirror editor
+
+🤖 **Ouros AI** — Local JS chatbot using tokenization, cosine similarity & fuzzy matching
+
+📈 **Canvas** — Graph equations like Desmos or draw freehand with shape tools
+
+🎵 **Music Player** — Paste any YouTube video or playlist URL and listen while you work
