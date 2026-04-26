@@ -176,6 +176,12 @@
       color: #4a5568;
       padding: 0 8px 0 6px;
     }
+    /* FIX: Restore CodeMirror's expected box model */
+  .CodeMirror *,
+  .CodeMirror *::before,
+  .CodeMirror *::after {
+    box-sizing: content-box;
+}
 
     /* FIX: output stays inside modal */
     #pyOutput {
