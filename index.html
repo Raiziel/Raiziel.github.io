@@ -66,6 +66,43 @@
     nav a:hover {
       color: var(--accent);
     }
+    /* ========================= */
+/* CODEMIRROR FIXES */
+/* ========================= */
+
+.CodeMirror {
+  height: 220px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.CodeMirror-gutters {
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.CodeMirror-linenumber {
+  padding-right: 8px;
+}
+
+.CodeMirror pre {
+  padding-left: 4px;
+}
+
+/* ========================= */
+/* PYTHON OUTPUT FIX */
+/* ========================= */
+
+#pyOutput {
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #0b1220;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 
     main {
       flex: 1;
@@ -200,7 +237,7 @@
   </div>
 
   <div class="card" onclick="openAI()">
-    <h2>Oros</h2>
+    <h2>Ouros</h2>
     <p>Ask your questions with AI</p>
   </div>
 
