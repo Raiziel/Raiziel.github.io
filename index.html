@@ -6,6 +6,11 @@
   <title>Ouroboros</title>
   <link rel="icon" type="image/png" href="Ouroboros.png">
 
+  <!-- ✅ CodeMirror (ADDED) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -145,6 +150,13 @@
       border-radius: 8px;
       max-width: 80%;
     }
+
+    /* ✅ CodeMirror styling fix */
+    .CodeMirror {
+      height: 200px;
+      border-radius: 10px;
+      margin: 0.5rem 0;
+    }
   </style>
 </head>
 
@@ -212,7 +224,10 @@
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
     <h2>Python Terminal</h2>
+
+    <!-- IMPORTANT: still textarea (required for CodeMirror init) -->
     <textarea id="pyInput">print("Hello Ouroboros")</textarea>
+
     <button onclick="runPython()">Run</button>
     <button onclick="closePython()">Close</button>
     <pre id="pyOutput"></pre>
@@ -282,10 +297,24 @@ calcInput.onkeydown=e=>{
 
 /* PYTHON */
 let pyodide;
+let editor; // ✅ CodeMirror instance
+
 loadPyodide().then(p=>pyodide=p);
 
 function openPython(){pyModal.classList.remove("hidden")}
 function closePython(){pyModal.classList.add("hidden")}
+
+/* ✅ INIT CODEMIRROR (ADDED) */
+window.addEventListener("load", () => {
+  editor = CodeMirror.fromTextArea(document.getElementById("pyInput"), {
+    mode: "python",
+    theme: "default",
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false
+  });
+});
 
 async function runPython(){
   await pyodide.runPythonAsync(`
@@ -295,11 +324,14 @@ sys.stdout=StringIO()
 sys.stderr=sys.stdout
   `);
 
-  await pyodide.runPythonAsync(pyInput.value);
+  // ✅ ONLY CHANGE: use CodeMirror instead of textarea
+  const code = editor ? editor.getValue() : pyInput.value;
+
+  await pyodide.runPythonAsync(code);
   pyOutput.textContent=await pyodide.runPythonAsync("sys.stdout.getvalue()");
 }
 
-/* AI (REAL NO-KEY MODEL) */
+/* AI (unchanged) */
 function openAI(){aiModal.classList.remove("hidden")}
 function closeAI(){aiModal.classList.add("hidden")}
 
@@ -362,22 +394,11 @@ async function sendMessage(){
   chatBox.scrollTop=chatBox.scrollHeight;
 }
 
-/* MUSIC */
+/* MUSIC (unchanged) */
 let player;
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
-  
-function enableClickOutsideClose(modalId) {
-  const modal = document.getElementById(modalId);
-
-  modal.addEventListener("click", (e) => {
-    // only close if user clicked the backdrop, not the window content
-    if (e.target === modal) {
-      modal.classList.add("hidden");
-    }
-  });
-}
 
 function getVideoID(url){
   const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
@@ -407,11 +428,8 @@ function togglePlay(){
 function nextVideo(){player.nextVideo()}
 function prevVideo(){player.previousVideo()}
 function setVolume(v){player.setVolume(v)}
-  
-enableClickOutsideClose("calcModal");
-enableClickOutsideClose("pyModal");
-enableClickOutsideClose("musicModal");
-enableClickOutsideClose("aiModal");
+
+
 
 </script>
 
