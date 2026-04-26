@@ -38,15 +38,12 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    header h1 {
-      font-size: 1.5rem;
-      color: var(--accent);
-    }
-
     .logo {
       display: flex;
       align-items: center;
       gap: 0.6rem;
+      color: var(--accent);
+      font-size: 1.5rem;
     }
 
     .logo img {
@@ -145,10 +142,10 @@
       padding: 2rem;
       border-radius: 16px;
       width: 90%;
-      max-width: 500px;
+      max-width: 600px;
     }
 
-    #calcInput, #pyInput {
+    #calcInput, #pyInput, #ytInput {
       width: 100%;
       padding: 0.75rem;
       border-radius: 8px;
@@ -200,19 +197,9 @@
     <p>Evaluate expressions and explore math.</p>
   </div>
 
-  <div class="card">
-    <h2>Converter</h2>
-    <p>Unit & data conversions.</p>
-  </div>
-
-  <div class="card">
-    <h2>Visualizer</h2>
-    <p>Graphs and interactive tools.</p>
-  </div>
-
-  <div class="card">
+  <div class="card" onclick="openMusic()">
     <h2>Music Player</h2>
-    <p>Drop your song/playlist here and jam out!</p>
+    <p>YouTube playback system.</p>
   </div>
 
   <div class="card" onclick="openPython()">
@@ -248,12 +235,39 @@ print("Hello Ouroboros")
   </div>
 </div>
 
+<!-- MUSIC MODAL (YOUTUBE) -->
+<div id="musicModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>YouTube Player</h2>
+
+    <input id="ytInput" placeholder="Paste YouTube link or ID" />
+
+    <button onclick="loadVideo()">Load</button>
+
+    <div id="player" style="margin-top:1rem;"></div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:1rem;">
+      <button onclick="prevVideo()">⏮</button>
+      <button onclick="togglePlay()">▶ / ⏸</button>
+      <button onclick="nextVideo()">⏭</button>
+    </div>
+
+    <div style="margin-top:1rem;">
+      <label>Volume</label>
+      <input type="range" min="0" max="100" onchange="setVolume(this.value)">
+    </div>
+
+    <button onclick="closeMusic()">Close</button>
+  </div>
+</div>
+
 <footer>
   © 2026 My Utility Hub
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
   function randomGreeting() {
@@ -270,34 +284,28 @@ print("Hello Ouroboros")
   // Calculator
   function openCalculator() {
     document.getElementById("calcModal").classList.remove("hidden");
-    document.getElementById("calcInput").focus();
   }
 
   function closeCalculator() {
     document.getElementById("calcModal").classList.add("hidden");
   }
 
-  const input = document.getElementById("calcInput");
-  const output = document.getElementById("calcOutput");
-
-  input.addEventListener("keydown", (e) => {
+  document.getElementById("calcInput").addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       try {
-        const result = math.evaluate(input.value);
-        output.innerHTML = `<p><b>Result:</b> ${result}</p>`;
+        const result = math.evaluate(e.target.value);
+        document.getElementById("calcOutput").innerHTML = `<p><b>${result}</b></p>`;
       } catch {
-        output.innerHTML = `<p>Invalid expression</p>`;
+        document.getElementById("calcOutput").innerHTML = `<p>Error</p>`;
       }
     }
   });
 
-  // Python (FIXED OUTPUT HANDLING)
+  // PYTHON (fixed output already)
   let pyodideReady = loadPyodide();
   let pyodide;
 
-  pyodideReady.then((p) => {
-    pyodide = p;
-  });
+  pyodideReady.then(p => pyodide = p);
 
   function openPython() {
     document.getElementById("pyModal").classList.remove("hidden");
@@ -315,25 +323,56 @@ print("Hello Ouroboros")
       await pyodide.runPythonAsync(`
 import sys
 from io import StringIO
-
 sys.stdout = StringIO()
 sys.stderr = sys.stdout
       `);
 
-      let result = await pyodide.runPythonAsync(code);
-      let output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
-
-      if (output.trim()) {
-        out.textContent = output;
-      } else if (result !== undefined) {
-        out.textContent = result;
-      } else {
-        out.textContent = "No output";
-      }
-
-    } catch (err) {
-      out.textContent = err;
+      await pyodide.runPythonAsync(code);
+      out.textContent = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+    } catch (e) {
+      out.textContent = e;
     }
+  }
+
+  // YOUTUBE PLAYER
+  let player;
+
+  function openMusic() {
+    document.getElementById("musicModal").classList.remove("hidden");
+  }
+
+  function closeMusic() {
+    document.getElementById("musicModal").classList.add("hidden");
+  }
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player("player", {
+      height: "250",
+      width: "100%",
+      videoId: "",
+    });
+  }
+
+  function getID(url) {
+    const match = url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+    return match ? match[1] : url;
+  }
+
+  function loadVideo() {
+    const id = getID(document.getElementById("ytInput").value);
+    player.loadVideoById(id);
+  }
+
+  function togglePlay() {
+    const state = player.getPlayerState();
+    state === 1 ? player.pauseVideo() : player.playVideo();
+  }
+
+  function nextVideo() {}
+  function prevVideo() {}
+
+  function setVolume(v) {
+    player.setVolume(v);
   }
 </script>
 
