@@ -148,36 +148,6 @@
       border-radius: 8px;
       max-width: 80%;
     }
-
-    /* ========================= */
-    /* CODEMIRROR FIX (IMPORTANT)
-    /* ========================= */
-
-    .CodeMirror {
-      height: 220px;
-      border-radius: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .CodeMirror-gutters {
-      background: #0b1220;
-      border-right: 1px solid rgba(255,255,255,0.08);
-      padding-right: 6px;
-    }
-
-    .CodeMirror-linenumber {
-      padding-right: 8px;
-      color: var(--muted);
-    }
-
-    .CodeMirror-sizer {
-      margin-left: 10px !important;
-    }
-
-    .CodeMirror pre {
-      padding-left: 10px !important;
-    }
   </style>
 </head>
 
@@ -219,10 +189,10 @@
     <p>Run Python code in-browser.</p>
   </div>
 
- <div class="card">
-  <h2>Placeholder</h2>
-  <p>Coming Soon!</p>.</p>
-</div>
+  <div class="card" onclick="openAI()"> 
+    <h2>Oros</h2> 
+    <p>Ask your questions with this built in model!</p> 
+  </div>
 
 </main>
 
@@ -251,8 +221,9 @@
 
 <script>
 
-/* MUSIC FIXED */
+/* ===== MUSIC FIX (ONLY REAL CHANGE) ===== */
 let player;
+const musicModal = document.getElementById("musicModal"); // ✅ FIX ADDED
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
