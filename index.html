@@ -367,6 +367,17 @@ let player;
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
+  
+function enableClickOutsideClose(modalId) {
+  const modal = document.getElementById(modalId);
+
+  modal.addEventListener("click", (e) => {
+    // only close if user clicked the backdrop, not the window content
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+    }
+  });
+}
 
 function getVideoID(url){
   const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
@@ -396,6 +407,11 @@ function togglePlay(){
 function nextVideo(){player.nextVideo()}
 function prevVideo(){player.previousVideo()}
 function setVolume(v){player.setVolume(v)}
+  
+enableClickOutsideClose("calcModal");
+enableClickOutsideClose("pyModal");
+enableClickOutsideClose("musicModal");
+enableClickOutsideClose("aiModal");
 
 </script>
 
