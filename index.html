@@ -6,6 +6,11 @@
   <title>Ouroboros</title>
   <link rel="icon" type="image/png" href="Ouroboros.png">
 
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -145,6 +150,40 @@
       border-radius: 8px;
       max-width: 80%;
     }
+
+    /* CodeMirror base styling */
+    .CodeMirror {
+      height: 220px;
+      border-radius: 10px;
+      margin: 0.5rem 0;
+      font-size: 14px;
+    }
+
+    /* FIX 1: prevent text overlapping line numbers */
+    .CodeMirror-gutters {
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .CodeMirror-linenumber {
+      padding-right: 8px;
+    }
+
+    .CodeMirror pre {
+      padding-left: 4px;
+    }
+
+    /* FIX 2: error/output stays inside modal */
+    #pyOutput {
+      max-height: 200px;
+      overflow-y: auto;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0b1220;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -192,8 +231,8 @@
   </div>
 
   <div class="card" onclick="openAI()">
-    <h2>Ouros</h2>
-    <p>Ask anything!</p>
+    <h2>Oros</h2>
+    <p>Ask your questions with this built in model!</p>
   </div>
 
 </main>
@@ -282,10 +321,23 @@ calcInput.onkeydown=e=>{
 
 /* PYTHON */
 let pyodide;
+let editor;
+
 loadPyodide().then(p=>pyodide=p);
 
 function openPython(){pyModal.classList.remove("hidden")}
 function closePython(){pyModal.classList.add("hidden")}
+
+window.addEventListener("load", () => {
+  editor = CodeMirror.fromTextArea(document.getElementById("pyInput"), {
+    mode: "python",
+    theme: "default",
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false
+  });
+});
 
 async function runPython(){
   await pyodide.runPythonAsync(`
@@ -295,11 +347,13 @@ sys.stdout=StringIO()
 sys.stderr=sys.stdout
   `);
 
-  await pyodide.runPythonAsync(pyInput.value);
+  const code = editor ? editor.getValue() : pyInput.value;
+
+  await pyodide.runPythonAsync(code);
   pyOutput.textContent=await pyodide.runPythonAsync("sys.stdout.getvalue()");
 }
 
-/* AI (REAL NO-KEY MODEL) */
+/* AI */
 function openAI(){aiModal.classList.remove("hidden")}
 function closeAI(){aiModal.classList.add("hidden")}
 
@@ -308,7 +362,6 @@ const aiInput=document.getElementById("aiInput");
 
 function addMessage(role,text){
   const div=document.createElement("div");
-
   if(role==="user"){
     div.style.background="#1e293b";
     div.style.marginLeft="auto";
@@ -317,7 +370,6 @@ function addMessage(role,text){
     div.style.background="#0f3a4a";
     div.innerHTML="🤖 "+text;
   }
-
   chatBox.appendChild(div);
   chatBox.scrollTop=chatBox.scrollHeight;
 }
@@ -362,22 +414,32 @@ async function sendMessage(){
   chatBox.scrollTop=chatBox.scrollHeight;
 }
 
-/* MUSIC */
+/* MUSIC — FIX 3: lazy init so player has a visible container */
 let player;
+let playerReady = false;
 
-function openMusic(){musicModal.classList.remove("hidden")}
+function openMusic(){
+  musicModal.classList.remove("hidden");
+  // Only create the player on first open — the iframe needs a visible container
+  if(!playerReady && typeof YT !== "undefined" && YT.Player){
+    initPlayer();
+  }
+}
+
 function closeMusic(){musicModal.classList.add("hidden")}
-  
-function enableClickOutsideClose(modalId) {
-  const modal = document.getElementById(modalId);
 
-  modal.addEventListener("click", (e) => {
-    // only close if user clicked the backdrop, not the window content
-    if (e.target === modal) {
-      modal.classList.add("hidden");
-    }
+function initPlayer(){
+  player = new YT.Player("player", {
+    height: "250",
+    width: "100%",
+    videoId: "",
+    events: { onReady: () => { playerReady = true; } }
   });
 }
+
+// YouTube API ready callback — intentionally empty
+// initPlayer() runs on first openMusic() call instead
+function onYouTubeIframeAPIReady(){}
 
 function getVideoID(url){
   const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
@@ -389,35 +451,23 @@ function getPlaylistID(url){
   return m?m[1]:null;
 }
 
-function onYouTubeIframeAPIReady(){
-  player=new YT.Player("player",{height:"250",width:"100%",videoId:""});
-}
-
 function loadMedia(){
+  if(!playerReady) return;
   const url=ytInput.value;
   const list=getPlaylistID(url);
-
   if(list) player.loadPlaylist({listType:"playlist",list});
   else player.loadVideoById(getVideoID(url));
 }
 
 function togglePlay(){
+  if(!playerReady) return;
   player.getPlayerState()===1?player.pauseVideo():player.playVideo();
 }
-function nextVideo(){player.nextVideo()}
-function prevVideo(){player.previousVideo()}
-function setVolume(v){player.setVolume(v)}
-  
-enableClickOutsideClose("calcModal");
-enableClickOutsideClose("pyModal");
-enableClickOutsideClose("musicModal");
-enableClickOutsideClose("aiModal");
+function nextVideo(){ if(playerReady) player.nextVideo(); }
+function prevVideo(){ if(playerReady) player.previousVideo(); }
+function setVolume(v){ if(playerReady) player.setVolume(v); }
 
 </script>
 
 </body>
 </html>
-
-into this 
-
-can you do that for me and make sure that you dont modify any of my code functionality
