@@ -92,13 +92,8 @@
       margin-bottom: 1rem;
     }
 
-    .hero h2 {
-      font-size: 2rem;
-    }
-
-    .hero span {
-      color: var(--accent);
-    }
+    .hero h2 { font-size: 2rem; }
+    .hero span { color: var(--accent); }
 
     button {
       margin-top: 1rem;
@@ -129,25 +124,39 @@
       max-width: 600px;
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: none;
-      margin: 0.5rem 0;
-    }
-
     pre {
       margin-top: 1rem;
       white-space: pre-wrap;
+      overflow-x: auto;
+      max-height: 250px;
+      overflow-y: auto;
     }
 
-    #chatBox div {
-      margin: 6px 0;
-      padding: 8px;
-      border-radius: 8px;
-      max-width: 80%;
+    /* =========================
+       CODEMIRROR FIX (IMPORTANT)
+    ========================= */
+
+    .CodeMirror {
+      height: 220px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
     }
+
+    .CodeMirror-gutters {
+      background: #0b1220;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .CodeMirror-linenumber {
+      color: var(--muted);
+      padding-right: 8px;
+    }
+
+    .CodeMirror-sizer {
+      margin-left: 8px !important;
+    }
+
   </style>
 </head>
 
@@ -171,12 +180,6 @@
   <div class="hero">
     <h2>Build. <span>Experiment.</span> Expand.</h2>
     <p>What you build, you return to.</p>
-    <button onclick="randomGreeting()">Click Me</button>
-  </div>
-
-  <div class="card" onclick="openCalculator()">
-    <h2>Calculator</h2>
-    <p>Evaluate expressions and explore math.</p>
   </div>
 
   <div class="card" onclick="openMusic()">
@@ -189,41 +192,56 @@
     <p>Run Python code in-browser.</p>
   </div>
 
-  <div class="card" onclick="openAI()"> 
-    <h2>Oros</h2> 
-    <p>Ask your questions with this built in model!</p> 
-  </div>
-
 </main>
+
+<!-- PYTHON -->
+<div id="pyModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Python Terminal</h2>
+
+    <textarea id="pyInput">print("Hello Ouroboros")</textarea>
+
+    <button onclick="runPython()">Run</button>
+    <button onclick="closePython()">Close</button>
+
+    <pre id="pyOutput"></pre>
+  </div>
+</div>
 
 <!-- MUSIC -->
 <div id="musicModal" class="modal hidden">
   <div class="modal-content">
-    <h2>YouTube Player</h2>
+    <h2>YouTube Music Player</h2>
 
-    <input id="ytInput" placeholder="YouTube link" />
+    <input id="ytInput" placeholder="Paste YouTube video or playlist link" />
     <button onclick="loadMedia()">Load</button>
 
-    <div id="player"></div>
+    <div id="player" style="margin-top:1rem;"></div>
 
-    <button onclick="prevVideo()">⏮</button>
-    <button onclick="togglePlay()">▶/⏸</button>
-    <button onclick="nextVideo()">⏭</button>
+    <div style="display:flex; justify-content:space-between; margin-top:1rem;">
+      <button onclick="prevVideo()">⏮</button>
+      <button onclick="togglePlay()">▶ / ⏸</button>
+      <button onclick="nextVideo()">⏭</button>
+    </div>
 
-    <input type="range" min="0" max="100" onchange="setVolume(this.value)">
+    <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)">
     <button onclick="closeMusic()">Close</button>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-/* ===== MUSIC FIX (ONLY REAL CHANGE) ===== */
+/* =========================
+   MUSIC (UNCHANGED WORKING)
+========================= */
+
 let player;
-const musicModal = document.getElementById("musicModal"); // ✅ FIX ADDED
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
@@ -246,11 +264,8 @@ function loadMedia(){
   const url=document.getElementById("ytInput").value;
   const list=getPlaylistID(url);
 
-  if(list){
-    player.loadPlaylist({listType:"playlist",list});
-  }else{
-    player.loadVideoById(getVideoID(url));
-  }
+  if(list) player.loadPlaylist({listType:"playlist",list});
+  else player.loadVideoById(getVideoID(url));
 }
 
 function togglePlay(){
@@ -261,6 +276,54 @@ function togglePlay(){
 function nextVideo(){player.nextVideo()}
 function prevVideo(){player.previousVideo()}
 function setVolume(v){player.setVolume(v)}
+
+
+/* =========================
+   PYTHON (CODEMIRROR FIXED)
+========================= */
+
+let pyodide;
+let editor;
+
+loadPyodide().then(p => pyodide = p);
+
+function openPython(){pyModal.classList.remove("hidden")}
+function closePython(){pyModal.classList.add("hidden")}
+
+window.addEventListener("load", () => {
+  editor = CodeMirror.fromTextArea(document.getElementById("pyInput"), {
+    mode: "python",
+    lineNumbers: true,
+    matchBrackets: true,
+    indentUnit: 4,
+    tabSize: 4,
+    extraKeys: {
+      "Tab": cm => cm.replaceSelection("    "),
+      "Ctrl-Enter": runPython
+    }
+  });
+});
+
+async function runPython(){
+  try {
+    await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+sys.stderr = sys.stdout
+    `);
+
+    const code = editor.getValue();
+
+    await pyodide.runPythonAsync(code);
+
+    const out = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+    pyOutput.textContent = out || "Executed (no output)";
+
+  } catch (err) {
+    pyOutput.textContent = "❌ Python Error:\n" + err;
+  }
+}
 
 </script>
 
