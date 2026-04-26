@@ -193,7 +193,7 @@
 
   <div class="card" onclick="openAI()">
     <h2>Oros</h2>
-    <p>Feel free to ask your questions with this built in AI model!</p>
+    <p>Ask your questions with this built in model!</p>
   </div>
 
 </main>
@@ -235,8 +235,31 @@
   </div>
 </div>
 
+<!-- MUSIC -->
+<div id="musicModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>YouTube Music Player</h2>
+
+    <input id="ytInput" placeholder="Paste YouTube video or playlist link" />
+    <button onclick="loadMedia()">Load</button>
+
+    <div id="player" style="margin-top:1rem;"></div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:1rem;">
+      <button onclick="prevVideo()">⏮</button>
+      <button onclick="togglePlay()">▶ / ⏸</button>
+      <button onclick="nextVideo()">⏭</button>
+    </div>
+
+    <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)">
+
+    <button onclick="closeMusic()">Close</button>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
@@ -276,7 +299,7 @@ sys.stderr=sys.stdout
   pyOutput.textContent=await pyodide.runPythonAsync("sys.stdout.getvalue()");
 }
 
-/* AI (FIXED VERSION) */
+/* AI (REAL NO-KEY MODEL) */
 function openAI(){aiModal.classList.remove("hidden")}
 function closeAI(){aiModal.classList.add("hidden")}
 
@@ -311,8 +334,6 @@ async function sendMessage(){
   aiBubble.innerHTML="🤖 thinking...";
   chatBox.appendChild(aiBubble);
 
-  chatBox.scrollTop=chatBox.scrollHeight;
-
   try{
     const res=await fetch(
       "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
@@ -340,6 +361,41 @@ async function sendMessage(){
 
   chatBox.scrollTop=chatBox.scrollHeight;
 }
+
+/* MUSIC */
+let player;
+
+function openMusic(){musicModal.classList.remove("hidden")}
+function closeMusic(){musicModal.classList.add("hidden")}
+
+function getVideoID(url){
+  const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+  return m?m[1]:url;
+}
+
+function getPlaylistID(url){
+  const m=url.match(/[?&]list=([^&]+)/);
+  return m?m[1]:null;
+}
+
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("player",{height:"250",width:"100%",videoId:""});
+}
+
+function loadMedia(){
+  const url=ytInput.value;
+  const list=getPlaylistID(url);
+
+  if(list) player.loadPlaylist({listType:"playlist",list});
+  else player.loadVideoById(getVideoID(url));
+}
+
+function togglePlay(){
+  player.getPlayerState()===1?player.pauseVideo():player.playVideo();
+}
+function nextVideo(){player.nextVideo()}
+function prevVideo(){player.previousVideo()}
+function setVolume(v){player.setVolume(v)}
 
 </script>
 
