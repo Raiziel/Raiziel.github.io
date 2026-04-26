@@ -9,9 +9,6 @@
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 
-  <!-- Addons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
-
   <style>
     :root {
       --bg: #0f172a;
@@ -66,43 +63,6 @@
     nav a:hover {
       color: var(--accent);
     }
-    /* ========================= */
-/* CODEMIRROR FIXES */
-/* ========================= */
-
-.CodeMirror {
-  height: 220px;
-  border-radius: 10px;
-  font-size: 14px;
-}
-
-.CodeMirror-gutters {
-  border-right: 1px solid rgba(255,255,255,0.08);
-}
-
-.CodeMirror-linenumber {
-  padding-right: 8px;
-}
-
-.CodeMirror pre {
-  padding-left: 4px;
-}
-
-/* ========================= */
-/* PYTHON OUTPUT FIX */
-/* ========================= */
-
-#pyOutput {
-  max-height: 200px;
-  overflow-y: auto;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-  background: #0b1220;
-  padding: 10px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
 
     main {
       flex: 1;
@@ -189,11 +149,34 @@
       max-width: 80%;
     }
 
-    /* CodeMirror styling */
+    /* ========================= */
+    /* CODEMIRROR FIX (IMPORTANT)
+    /* ========================= */
+
     .CodeMirror {
       height: 220px;
       border-radius: 10px;
       font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .CodeMirror-gutters {
+      background: #0b1220;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      padding-right: 6px;
+    }
+
+    .CodeMirror-linenumber {
+      padding-right: 8px;
+      color: var(--muted);
+    }
+
+    .CodeMirror-sizer {
+      margin-left: 10px !important;
+    }
+
+    .CodeMirror pre {
+      padding-left: 10px !important;
     }
   </style>
 </head>
@@ -236,54 +219,21 @@
     <p>Run Python code in-browser.</p>
   </div>
 
-  <div class="card" onclick="openAI()">
-    <h2>Ouros</h2>
-    <p>Ask your questions with AI</p>
-  </div>
+ <div class="card">
+  <h2>Placeholder</h2>
+  <p>Coming Soon!</p>.</p>
+</div>
 
 </main>
-
-<!-- Calculator -->
-<div id="calcModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Calculator</h2>
-    <input id="calcInput" placeholder="2+2, sqrt(16)" />
-    <div id="calcOutput"></div>
-    <button onclick="closeCalculator()">Close</button>
-  </div>
-</div>
-
-<!-- Python -->
-<div id="pyModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Python Terminal</h2>
-
-    <textarea id="pyInput">print("Hello Ouroboros")</textarea>
-
-    <button onclick="runPython()">Run (Ctrl+Enter)</button>
-    <button onclick="closePython()">Close</button>
-
-    <pre id="pyOutput"></pre>
-  </div>
-</div>
-
-<!-- AI -->
-<div id="aiModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>AI</h2>
-    <div id="chatBox"></div>
-    <input id="aiInput" placeholder="Ask something..." />
-    <button onclick="sendMessage()">Send</button>
-    <button onclick="closeAI()">Close</button>
-  </div>
-</div>
 
 <!-- MUSIC -->
 <div id="musicModal" class="modal hidden">
   <div class="modal-content">
     <h2>YouTube Player</h2>
+
     <input id="ytInput" placeholder="YouTube link" />
     <button onclick="loadMedia()">Load</button>
+
     <div id="player"></div>
 
     <button onclick="prevVideo()">⏮</button>
@@ -295,97 +245,51 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
-<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
 
-function randomGreeting(){
-  alert("Keep building.");
-}
-
-/* CALC */
-function openCalculator(){calcModal.classList.remove("hidden")}
-function closeCalculator(){calcModal.classList.add("hidden")}
-
-calcInput.onkeydown=e=>{
-  if(e.key==="Enter"){
-    try{calcOutput.innerHTML=math.evaluate(calcInput.value);}
-    catch{calcOutput.innerHTML="Error";}
-  }
-};
-
-/* PYTHON */
-let pyodide;
-let editor;
-
-loadPyodide().then(p=>pyodide=p);
-
-function openPython(){pyModal.classList.remove("hidden")}
-function closePython(){pyModal.classList.add("hidden")}
-
-window.addEventListener("load",()=>{
-  editor = CodeMirror.fromTextArea(document.getElementById("pyInput"),{
-    mode:"python",
-    lineNumbers:true,
-    matchBrackets:true,
-    indentUnit:4,
-    extraKeys:{
-      "Ctrl-Enter":runPython,
-      "Cmd-Enter":runPython,
-      "Tab":cm=>cm.replaceSelection("    ")
-    }
-  });
-});
-
-async function runPython(){
-  try{
-    await pyodide.runPythonAsync(`
-import sys
-from io import StringIO
-sys.stdout=StringIO()
-sys.stderr=sys.stdout
-    `);
-
-    const code = editor.getValue();
-    await pyodide.runPythonAsync(code);
-
-    const out = await pyodide.runPythonAsync("sys.stdout.getvalue()");
-    pyOutput.textContent = out || "Executed (no output)";
-
-  }catch(err){
-    pyOutput.textContent = "❌ Error:\n" + err;
-  }
-}
-
-/* AI */
-function openAI(){aiModal.classList.remove("hidden")}
-function closeAI(){aiModal.classList.add("hidden")}
-
-const chatBox=document.getElementById("chatBox");
-const aiInput=document.getElementById("aiInput");
-
-function add(role,text){
-  const d=document.createElement("div");
-  d.textContent=(role==="user"?"🧑 ":"🤖 ")+text;
-  chatBox.appendChild(d);
-}
-
-async function sendMessage(){
-  const t=aiInput.value;
-  add("user",t);
-  aiInput.value="";
-}
-
-/* MUSIC (simplified unchanged) */
+/* MUSIC FIXED */
 let player;
 
 function openMusic(){musicModal.classList.remove("hidden")}
 function closeMusic(){musicModal.classList.add("hidden")}
+
+function getVideoID(url){
+  const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+  return m?m[1]:url;
+}
+
+function getPlaylistID(url){
+  const m=url.match(/[?&]list=([^&]+)/);
+  return m?m[1]:null;
+}
+
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("player",{height:"260",width:"100%",videoId:""});
+}
+
+function loadMedia(){
+  const url=document.getElementById("ytInput").value;
+  const list=getPlaylistID(url);
+
+  if(list){
+    player.loadPlaylist({listType:"playlist",list});
+  }else{
+    player.loadVideoById(getVideoID(url));
+  }
+}
+
+function togglePlay(){
+  if(player.getPlayerState()===1) player.pauseVideo();
+  else player.playVideo();
+}
+
+function nextVideo(){player.nextVideo()}
+function prevVideo(){player.previousVideo()}
+function setVolume(v){player.setVolume(v)}
 
 </script>
 
