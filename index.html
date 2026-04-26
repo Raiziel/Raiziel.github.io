@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,6 +34,10 @@
       font-family: 'Segoe UI', sans-serif;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background: linear-gradient(135deg, #020617, #0f172a);
       color: var(--text);
@@ -47,6 +52,8 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      z-index: 10;
     }
 
     .logo {
@@ -130,38 +137,168 @@
       font-size: 13px;
       margin-top: 0;
     }
-.calc-btn {
-  padding: 4px 10px;
-  font-size: 13px;
-  background: #0b1220;
-  color: var(--accent);
-  border: 1px solid #334155;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 0;
-  font-weight: bold;
-}
 
-.calc-btn:hover {
-  background: #1e293b;
-}
+    .calc-btn {
+      padding: 4px 10px;
+      font-size: 13px;
+      background: #0b1220;
+      color: var(--accent);
+      border: 1px solid #334155;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0;
+      font-weight: bold;
+    }
 
-    main {
-      flex: 1;
-      padding: 2rem;
-      padding-left: 6.1rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+    .calc-btn:hover {
+      background: #1e293b;
+    }
+
+    /* SHARED PAGE SECTION */
+    .page-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      position: relative;
+    }
+
+    /* HERO */
+    .hero-section {
+      text-align: center;
+    }
+
+    .hero-section h2 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-section span {
+      color: var(--accent);
+    }
+
+    .hero-section p {
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+
+    /* SCROLL ARROW */
+    .scroll-arrow {
+      display: inline-block;
+      color: var(--accent);
+      font-size: 1.3rem;
+      text-decoration: none;
+      animation: bounce 2s ease infinite;
+      position: absolute;
+      bottom: 3rem;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(10px); }
+    }
+
+    /* ABOUT SECTION */
+    .about-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .about-section h2 span {
+      color: var(--accent);
+    }
+
+    .about-section > p {
+      max-width: 650px;
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .about-features {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .about-feature {
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
+      width: 190px;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .about-feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .af-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 0.7rem;
+    }
+
+    .about-feature h3 {
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .about-feature p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    /* TOOLS SECTION */
+    .tools-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .tools-section h2 span {
+      color: var(--accent);
+    }
+
+    .card-row {
+      display: flex;
       gap: 1.5rem;
       justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
     }
 
     .card {
       background: var(--card);
-      padding: 1.5rem;
+      padding: 2rem;
       border-radius: 16px;
       cursor: pointer;
       transition: 0.2s;
+      width: 230px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .card:hover {
@@ -169,18 +306,16 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
-    .hero {
-      grid-column: 1 / -1;
-      text-align: center;
-      margin-bottom: 1rem;
+    /* FADE IN */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
     }
 
-    .hero h2 {
-      font-size: 2rem;
-    }
-
-    .hero span {
-      color: var(--accent);
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     button {
@@ -200,6 +335,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      z-index: 100;
     }
 
     .hidden { display: none; }
@@ -286,44 +422,100 @@
   </h1>
 
   <nav>
-    <a href="#">About</a>
+    <a href="#about">About</a>
+    <a href="#tools">Tools</a>
     <a href="https://www.linkedin.com/in/nicholas-valantino/">Contact</a>
   </nav>
 </header>
 
-<main>
+<!-- SECTION 1: HERO -->
+<section id="hero" class="page-section hero-section">
+  <h2>Think. <span>Create.</span> Innovate.</h2>
+  <p>The best way to predict the future is to invent it.</p>
+  <a href="#about" class="scroll-arrow">↓ Explore</a>
+</section>
 
-  <div class="hero">
-    <h2>Think. <span>Create.</span> Innovate.</h2>
-    <p>The best way to predict the future is to invent it.</p>
+<!-- SECTION 2: ABOUT -->
+<section id="about" class="page-section about-section fade-in">
+  <h2>About <span>Ouroboros</span></h2>
+  <p>
+    Ouroboros is a self-contained workspace for thinkers, builders, and creators.
+    Every tool here lives in your browser — no accounts, no installs, no cloud dependency.
+  </p>
+  <p>
+    Named after the ancient serpent that consumes itself to be reborn,
+    Ouroboros embodies the philosophy that every ending fuels a new beginning.
+    
+  </p>
+
+  <div class="about-features">
+    <div class="about-feature fade-in">
+      <span class="af-icon">🧮</span>
+      <h3>Calculate</h3>
+      <p>Evaluate expressions, derivatives, integrals, powered by math.js</p>
+    </div>
+    <div class="about-feature fade-in">
+      <span class="af-icon">🎵</span>
+      <h3>Listen</h3>
+      <p>Load any YouTube video or playlist and vibe while you work.</p>
+    </div>
+    <div class="about-feature fade-in">
+      <span class="af-icon">🐍</span>
+      <h3>Code</h3>
+      <p>Run real Python in-browser with OuroShell, powered by Pyodide.</p>
+    </div>
+    <div class="about-feature fade-in">
+      <span class="af-icon">🤖</span>
+      <h3>Ask</h3>
+      <p> Chat with Ouros, a local AI engine running entirely in JavaScript.</p>
+    </div>
+    <div class="about-feature fade-in">
+      <span class="af-icon">📈</span>
+      <h3>Visualize</h3>
+      <p>Graph equations or draw freehand on the Canvas.</p>
+    </div>
+
+    <div class="about-feature fade-in">
+      <span class="af-icon">♾️</span>
+      <h3>Repeat</h3>
+      <p>The cycle never ends. Every tool feeds the next thing you build.</p>
+    </div>
   </div>
 
-  <div class="card" onclick="openCalculator()">
-    <h2>Calculator</h2>
-    <p>Evaluate expressions and explore math.</p>
-  </div>
+  <a href="#tools" class="scroll-arrow">↓ Tools</a>
+</section>
 
-  <div class="card" onclick="openMusic()">
-    <h2>Music Player</h2>
-    <p>Listen to your YouTube Playlist here!</p>
-  </div>
+<!-- SECTION 3: TOOLS -->
+<section id="tools" class="page-section tools-section fade-in">
+  <h2>Your <span>Toolkit</span></h2>
 
-  <div class="card" onclick="openPython()">
-    <h2>OuroShell</h2>
-    <p>Run Python code in-browser.</p>
-  </div>
+  <div class="card-row">
+    <div class="card" onclick="openCalculator()">
+      <h2>Calculator</h2>
+      <p></p>
+    </div>
 
-  <div class="card" onclick="openAI()">
-    <h2>Ouros</h2>
-    <p>Ask your questions here!</p>
-  </div>
+    <div class="card" onclick="openMusic()">
+      <h2>Music Player</h2>
+      <p></p>
+    </div>
 
-  <div class="card" onclick="openVisualizer()">
-    <h2>Canvas</h2>
-    <p>Graph functions or draw freely.</p>
-  </div>
+    <div class="card" onclick="openPython()">
+      <h2>OuroShell</h2>
+      <p></p>
+    </div>
 
-</main>
+    <div class="card" onclick="openAI()">
+      <h2>Ouros</h2>
+      <p></p>
+    </div>
+
+    <div class="card" onclick="openVisualizer()">
+      <h2>Canvas</h2>
+      <p></p>
+    </div>
+  </div>
+</section>
 
 <!-- Calculator -->
 <div id="calcModal" class="modal hidden">
@@ -331,7 +523,6 @@
     <h2>Calculator</h2>
     <input id="calcInput" placeholder="2+2, d/dx x^3, ∫(x^2, 0, 5)" />
     
-    <!-- Symbol buttons -->
     <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
       <button class="calc-btn" onclick="insertCalc('d/dx ')">d/dx</button>
       <button class="calc-btn" onclick="insertCalc('d2/dx2 ')">d²/dx²</button>
@@ -483,62 +674,43 @@ function insertCalc(text){
   input.selectionStart = input.selectionEnd = start + text.length;
 }
 
-// ---- Symbolic Derivative ----
 function symbolicDerivative(expr, variable = "x"){
   const node = math.parse(expr);
   const derived = math.derivative(node, variable);
   return math.simplify(derived).toString();
 }
 
-// ---- Second Derivative ----
 function symbolicSecondDerivative(expr, variable = "x"){
   const first = symbolicDerivative(expr, variable);
   return symbolicDerivative(first, variable);
 }
 
-// ---- Numerical Definite Integral (Simpson's Rule) ----
 function numericalIntegral(exprStr, a, b, n = 1000){
   if(n % 2 !== 0) n++;
   const h = (b - a) / n;
   let sum = 0;
-  
   const f = (x) => {
-    try {
-      return math.evaluate(exprStr, { x });
-    } catch(e) {
-      return NaN;
-    }
+    try { return math.evaluate(exprStr, { x }); }
+    catch(e) { return NaN; }
   };
-  
   sum += f(a) + f(b);
-  
   for(let i = 1; i < n; i++){
     const x = a + i * h;
     sum += (i % 2 === 0 ? 2 : 4) * f(x);
   }
-  
   return (h / 3) * sum;
 }
 
-// ---- Symbolic Indefinite Integral (common forms) ----
 function symbolicIntegral(expr){
   const e = expr.trim();
-  
-  // Power rule: x^n → x^(n+1)/(n+1)
   const powerMatch = e.match(/^x\^([\d\.]+)$/);
   if(powerMatch){
     const n = parseFloat(powerMatch[1]);
     if(n === -1) return "ln|x| + C";
     return `x^${n+1}/${n+1} + C`;
   }
-  
-  // Just x → x^2/2
   if(e === "x") return "x^2/2 + C";
-  
-  // Constant
   if(/^[\d\.]+$/.test(e)) return `${e}x + C`;
-  
-  // Coefficient * x^n
   const coefPower = e.match(/^([\d\.]+)\s*\*?\s*x\^([\d\.]+)$/);
   if(coefPower){
     const c = parseFloat(coefPower[1]);
@@ -548,15 +720,11 @@ function symbolicIntegral(expr){
     const simplified = Number.isInteger(newCoef) ? newCoef : newCoef.toFixed(4);
     return `${simplified} * x^${n+1} + C`;
   }
-
-  // Coefficient * x
   const coefX = e.match(/^([\d\.]+)\s*\*?\s*x$/);
   if(coefX){
     const c = parseFloat(coefX[1]);
     return `${c/2} * x^2 + C`;
   }
-  
-  // Common trig/exp
   const known = {
     "sin(x)": "-cos(x) + C",
     "cos(x)": "sin(x) + C",
@@ -572,51 +740,36 @@ function symbolicIntegral(expr){
     "sin(x)^2": "x/2 - sin(2x)/4 + C",
     "cos(x)^2": "x/2 + sin(2x)/4 + C",
   };
-  
   if(known[e]) return known[e];
-  
-  // Sum of terms: try splitting by + or -
   const terms = e.split(/(?=[\+\-])/);
   if(terms.length > 1){
     const integrated = terms.map(t => {
       const result = symbolicIntegral(t.trim().replace(/^\+\s*/, ""));
-      return result.replace(" + C", "");
+      return result ? result.replace(" + C", "") : null;
     });
     if(integrated.every(r => r !== null)){
       return integrated.join(" + ") + " + C";
     }
   }
-  
   return null;
 }
 
-// ---- Main Calculator ----
 function evaluateCalc(input){
   const trimmed = input.trim();
-  
-  // Second derivative: d2/dx2 expr
   const d2Match = trimmed.match(/^d2\/dx2\s+(.+)$/i);
   if(d2Match){
     try {
       const result = symbolicSecondDerivative(d2Match[1]);
       return `d²/dx²(${d2Match[1]}) = <strong>${result}</strong>`;
-    } catch(e){
-      return "❌ Could not compute second derivative: " + e.message;
-    }
+    } catch(e){ return "❌ Could not compute second derivative: " + e.message; }
   }
-  
-  // Derivative: d/dx expr
   const dMatch = trimmed.match(/^d\/dx\s+(.+)$/i);
   if(dMatch){
     try {
       const result = symbolicDerivative(dMatch[1]);
       return `d/dx(${dMatch[1]}) = <strong>${result}</strong>`;
-    } catch(e){
-      return "❌ Could not compute derivative: " + e.message;
-    }
+    } catch(e){ return "❌ Could not compute derivative: " + e.message; }
   }
-  
-  // Definite integral: ∫(expr, a, b)
   const defIntMatch = trimmed.match(/^[∫∫]\((.+),\s*([\d\.\-]+),\s*([\d\.\-]+)\)$/);
   if(defIntMatch){
     try {
@@ -625,35 +778,23 @@ function evaluateCalc(input){
       const b = parseFloat(defIntMatch[3]);
       const result = numericalIntegral(expr, a, b);
       return `∫(${expr}) from ${a} to ${b} = <strong>${parseFloat(result.toFixed(6))}</strong>`;
-    } catch(e){
-      return "❌ Could not compute integral: " + e.message;
-    }
+    } catch(e){ return "❌ Could not compute integral: " + e.message; }
   }
-  
-  // Indefinite integral: ∫ expr
   const indefMatch = trimmed.match(/^[∫∫]\s+(.+)$/);
   if(indefMatch){
     const expr = indefMatch[1].trim();
     const result = symbolicIntegral(expr);
-    if(result){
-      return `∫(${expr})dx = <strong>${result}</strong>`;
-    }
+    if(result) return `∫(${expr})dx = <strong>${result}</strong>`;
     return "❌ Cannot symbolically integrate this expression. Try a definite integral with bounds: ∫(expr, a, b)";
   }
-  
-  // Regular math
   try {
     const result = math.evaluate(trimmed);
     return `= <strong>${result}</strong>`;
-  } catch(e){
-    return "❌ Error: " + e.message;
-  }
+  } catch(e){ return "❌ Error: " + e.message; }
 }
 
 calcInput.onkeydown = e => {
-  if(e.key === "Enter"){
-    calcOutput.innerHTML = evaluateCalc(calcInput.value);
-  }
+  if(e.key === "Enter") calcOutput.innerHTML = evaluateCalc(calcInput.value);
 };
 
 /* PYTHON */
@@ -671,9 +812,7 @@ async function loadPyodideIfNeeded(){
 function openPython(){
   pyModal.classList.remove("hidden");
   loadPyodideIfNeeded();
-  if(editor) {
-    setTimeout(() => editor.refresh(), 10);
-  }
+  if(editor) setTimeout(() => editor.refresh(), 10);
 }
 function closePython(){ pyModal.classList.add("hidden"); }
 
@@ -699,7 +838,6 @@ window.addEventListener("load", () => {
 async function runPython(){
   const output = document.getElementById("pyOutput");
   output.style.color = "var(--text)";
-
   try {
     await pyodide.runPythonAsync(`
 import sys
@@ -707,12 +845,10 @@ from io import StringIO
 sys.stdout = StringIO()
 sys.stderr = sys.stdout
     `);
-
     const code = editor ? editor.getValue() : document.getElementById("pyInput").value;
     await pyodide.runPythonAsync(code);
     const result = await pyodide.runPythonAsync("sys.stdout.getvalue()");
     output.textContent = result || "Executed (no output)";
-
   } catch(err) {
     output.textContent = "❌ Python Error:\n\n" + err;
     output.style.color = "#ff4d4d";
@@ -720,12 +856,10 @@ sys.stderr = sys.stdout
 }
 
 document.addEventListener("keydown", (e) => {
-  if((e.ctrlKey || e.metaKey) && e.key === "Enter"){
-    if(editor) runPython();
-  }
+  if((e.ctrlKey || e.metaKey) && e.key === "Enter") if(editor) runPython();
 });
 
-/* ========== OUROS: In-Page AI Engine ========== */
+/* ========== OUROS ========== */
 
 function openAI(){ aiModal.classList.remove("hidden"); }
 function closeAI(){ aiModal.classList.add("hidden"); }
@@ -752,10 +886,7 @@ function addMessage(role, text){
 }
 
 function tokenize(text){
-  return text.toLowerCase()
-    .replace(/[^\w\s]/g, " ")
-    .split(/\s+/)
-    .filter(w => w.length > 1);
+  return text.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter(w => w.length > 1);
 }
 
 const stopwords = new Set([
@@ -770,17 +901,13 @@ const stopwords = new Set([
   "very","really","also","than","too","then","only","own","same"
 ]);
 
-function filterTokens(tokens){
-  return tokens.filter(t => !stopwords.has(t));
-}
+function filterTokens(tokens){ return tokens.filter(t => !stopwords.has(t)); }
 
 function cosineSimilarity(a, b){
   const setA = new Set(a);
   const setB = new Set(b);
   let intersection = 0;
-  for(const word of setA){
-    if(setB.has(word)) intersection++;
-  }
+  for(const word of setA) if(setB.has(word)) intersection++;
   const magnitude = Math.sqrt(setA.size) * Math.sqrt(setB.size);
   return magnitude === 0 ? 0 : intersection / magnitude;
 }
@@ -792,11 +919,8 @@ function fuzzyMatch(word, target){
     let matches = 0;
     const shorter = word.length < target.length ? word : target;
     const longer = word.length < target.length ? target : word;
-    for(let i = 0; i < shorter.length; i++){
-      if(longer.includes(shorter[i])) matches++;
-    }
-    const ratio = matches / longer.length;
-    if(ratio > 0.8) return 0.5;
+    for(let i = 0; i < shorter.length; i++) if(longer.includes(shorter[i])) matches++;
+    if(matches / longer.length > 0.8) return 0.5;
   }
   return 0;
 }
@@ -805,15 +929,9 @@ function enhancedSimilarity(inputTokens, entryKeywords){
   let score = 0;
   const filtered = filterTokens(inputTokens);
   score += cosineSimilarity(filtered, entryKeywords) * 2;
-  for(const token of filtered){
-    for(const kw of entryKeywords){
-      score += fuzzyMatch(token, kw) * 0.5;
-    }
-  }
+  for(const token of filtered) for(const kw of entryKeywords) score += fuzzyMatch(token, kw) * 0.5;
   const input = inputTokens.join(" ");
-  for(const kw of entryKeywords){
-    if(input.includes(kw)) score += kw.split(" ").length * 0.3;
-  }
+  for(const kw of entryKeywords) if(input.includes(kw)) score += kw.split(" ").length * 0.3;
   return score;
 }
 
@@ -1110,16 +1228,11 @@ function tryMath(input){
     if(/^[\d\s\+\-\*\/\^\(\)\.\,\%\!]+$/.test(cleaned) ||
        /^(sqrt|sin|cos|tan|log|abs|pi|e|exp|ceil|floor|round|pow|mod)\b/i.test(cleaned)){
       const result = math.evaluate(cleaned);
-      if(typeof result === "number" || typeof result === "object"){
-        return `🧮 ${cleaned} = **${result}**`;
-      }
+      if(typeof result === "number" || typeof result === "object") return `🧮 ${cleaned} = **${result}**`;
     }
     const mathMatch = input.match(/([\d\.]+)\s*([\+\-\*\/\^]|plus|minus|times|divided by|to the power of)\s*([\d\.]+)/i);
     if(mathMatch){
-      const ops = {
-        "plus":"+", "minus":"-", "times":"*",
-        "divided by":"/", "to the power of":"^"
-      };
+      const ops = { "plus":"+", "minus":"-", "times":"*", "divided by":"/", "to the power of":"^" };
       let op = mathMatch[2];
       if(ops[op.toLowerCase()]) op = ops[op.toLowerCase()];
       const expr = `${mathMatch[1]} ${op} ${mathMatch[3]}`;
@@ -1141,24 +1254,18 @@ function generateResponse(input){
   if(conversationMemory.length > 0){
     const lastBot = conversationMemory[conversationMemory.length - 1];
     if(lastBot && lastBot.role === "bot"){
-      if(/^(yes|yeah|yep|sure|ok|please|go ahead)$/i.test(lower)){
+      if(/^(yes|yeah|yep|sure|ok|please|go ahead)$/i.test(lower))
         return "Great! Go ahead and try it. If you need help with specifics, just ask!";
-      }
-      if(/^(no|nah|nope|not really)$/i.test(lower)){
+      if(/^(no|nah|nope|not really)$/i.test(lower))
         return "No problem! What else would you like to know?";
-      }
     }
   }
 
   let bestEntry = null;
   let bestScore = 0;
-
   for(const entry of knowledgeBase){
     const score = enhancedSimilarity(tokens, entry.keywords);
-    if(score > bestScore){
-      bestScore = score;
-      bestEntry = entry;
-    }
+    if(score > bestScore){ bestScore = score; bestEntry = entry; }
   }
 
   if(bestEntry && bestScore > 0.3){
@@ -1214,8 +1321,8 @@ function sendMessage(){
     const reply = generateResponse(text);
     aiBubble.innerHTML = "🤖 " + reply
       .replace(/\n/g, "<br>")
-      .replace(/\*\*(.*?)\*\*/g, "<strong>\$1</strong>")
-      .replace(/`(.*?)`/g, "<code style='background:#1a2235;padding:2px 6px;border-radius:4px;'>\$1</code>");
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/`(.*?)`/g, "<code style='background:#1a2235;padding:2px 6px;border-radius:4px;'>$1</code>");
 
     conversationMemory.push({ role: "bot", text: reply });
 
@@ -1237,9 +1344,7 @@ let playerReady = false;
 
 function openMusic(){
   musicModal.classList.remove("hidden");
-  if(!playerReady && typeof YT !== "undefined" && YT.Player){
-    initPlayer();
-  }
+  if(!playerReady && typeof YT !== "undefined" && YT.Player) initPlayer();
 }
 
 function closeMusic(){ musicModal.classList.add("hidden"); }
@@ -1306,7 +1411,6 @@ function setVizMode(mode){
   document.getElementById("btnGraph").style.background = mode === "graph" ? "#38bdf8" : "#475569";
   document.getElementById("btnDraw").style.background = mode === "draw" ? "#38bdf8" : "#475569";
   document.getElementById("vizTitle").textContent = mode === "graph" ? "📈 Graph Mode" : "🎨 Draw Mode";
-
   setTimeout(() => {
     if(mode === "graph"){ resizeGraphCanvas(); drawGraph(); }
     else { resizeDrawCanvas(); redrawDrawCanvas(); }
@@ -1325,7 +1429,6 @@ function addEquation(){
   const idx = equations.length;
   const color = eqColors[idx % eqColors.length];
   equations.push({ expr: "", color });
-
   const row = document.createElement("div");
   row.className = "eq-row";
   row.id = "eqRow" + idx;
@@ -1375,42 +1478,25 @@ function drawGraph(){
 
   ctx.strokeStyle = "#1e293b";
   ctx.lineWidth = 1;
-
   for(let x = Math.ceil(graphXMin); x <= graphXMax; x++){
-    ctx.beginPath();
-    ctx.moveTo(toScreenX(x), 0);
-    ctx.lineTo(toScreenX(x), h);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(toScreenX(x), 0); ctx.lineTo(toScreenX(x), h); ctx.stroke();
   }
   for(let y = Math.ceil(graphYMin); y <= graphYMax; y++){
-    ctx.beginPath();
-    ctx.moveTo(0, toScreenY(y));
-    ctx.lineTo(w, toScreenY(y));
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, toScreenY(y)); ctx.lineTo(w, toScreenY(y)); ctx.stroke();
   }
 
   ctx.strokeStyle = "#475569";
   ctx.lineWidth = 2;
-
-  ctx.beginPath();
-  ctx.moveTo(toScreenX(0), 0);
-  ctx.lineTo(toScreenX(0), h);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(0, toScreenY(0));
-  ctx.lineTo(w, toScreenY(0));
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(toScreenX(0), 0); ctx.lineTo(toScreenX(0), h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, toScreenY(0)); ctx.lineTo(w, toScreenY(0)); ctx.stroke();
 
   ctx.fillStyle = "#64748b";
   ctx.font = "11px sans-serif";
   ctx.textAlign = "center";
-
   for(let x = Math.ceil(graphXMin); x <= graphXMax; x++){
     if(x === 0) continue;
     ctx.fillText(x, toScreenX(x), toScreenY(0) + 14);
   }
-
   ctx.textAlign = "right";
   for(let y = Math.ceil(graphYMin); y <= graphYMax; y++){
     if(y === 0) continue;
@@ -1419,31 +1505,21 @@ function drawGraph(){
 
   equations.forEach(eq => {
     if(!eq.expr.trim()) return;
-
     ctx.strokeStyle = eq.color;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-
     let started = false;
     const steps = w * 2;
-
     for(let i = 0; i <= steps; i++){
       const x = graphXMin + (graphXMax - graphXMin) * i / steps;
       try {
         const y = math.evaluate(eq.expr, { x });
-        if(typeof y !== "number" || !isFinite(y)){
-          started = false;
-          continue;
-        }
+        if(typeof y !== "number" || !isFinite(y)){ started = false; continue; }
         const sx = toScreenX(x);
         const sy = toScreenY(y);
-
         if(!started){ ctx.moveTo(sx, sy); started = true; }
         else { ctx.lineTo(sx, sy); }
-
-      } catch(e){
-        started = false;
-      }
+      } catch(e){ started = false; }
     }
     ctx.stroke();
   });
@@ -1464,9 +1540,7 @@ document.getElementById("graphCanvas").addEventListener("wheel", (e) => {
 let graphDragging = false, graphLastX, graphLastY;
 
 document.getElementById("graphCanvas").addEventListener("mousedown", (e) => {
-  graphDragging = true;
-  graphLastX = e.offsetX;
-  graphLastY = e.offsetY;
+  graphDragging = true; graphLastX = e.offsetX; graphLastY = e.offsetY;
 });
 
 document.getElementById("graphCanvas").addEventListener("mousemove", (e) => {
@@ -1476,8 +1550,7 @@ document.getElementById("graphCanvas").addEventListener("mousemove", (e) => {
   const dy = (e.offsetY - graphLastY) / c.height * (graphYMax - graphYMin);
   graphXMin -= dx; graphXMax -= dx;
   graphYMin += dy; graphYMax += dy;
-  graphLastX = e.offsetX;
-  graphLastY = e.offsetY;
+  graphLastX = e.offsetX; graphLastY = e.offsetY;
   drawGraph();
 });
 
@@ -1498,7 +1571,6 @@ function resizeDrawCanvas(){
     const img = c.toDataURL();
     c.width = c.clientWidth;
     c.height = c.clientHeight;
-
     const i = new Image();
     i.onload = () => { c.getContext("2d").drawImage(i, 0, 0); };
     i.src = img;
@@ -1511,7 +1583,6 @@ function setDrawTool(tool){
   const id = "tb" + tool.charAt(0).toUpperCase() + tool.slice(1);
   const btn = document.getElementById(id);
   if(btn) btn.classList.add("active-tool");
-
   const c = document.getElementById("drawCanvas");
   c.style.cursor = tool === "text" ? "text" : "crosshair";
 }
@@ -1520,17 +1591,9 @@ document.getElementById("brushSize").addEventListener("input", function(){
   document.getElementById("sizeLabel").textContent = this.value;
 });
 
-function getDrawCtx(){
-  return document.getElementById("drawCanvas").getContext("2d");
-}
-
-function getDrawColor(){
-  return drawTool === "eraser" ? "#ffffff" : document.getElementById("drawColor").value;
-}
-
-function getSize(){
-  return parseInt(document.getElementById("brushSize").value);
-}
+function getDrawCtx(){ return document.getElementById("drawCanvas").getContext("2d"); }
+function getDrawColor(){ return drawTool === "eraser" ? "#ffffff" : document.getElementById("drawColor").value; }
+function getSize(){ return parseInt(document.getElementById("brushSize").value); }
 
 function saveState(){
   const c = document.getElementById("drawCanvas");
@@ -1583,12 +1646,10 @@ dc.addEventListener("mousedown", (e) => {
     ctx.fillText(text, e.offsetX, e.offsetY);
     return;
   }
-
   drawing = true;
   drawStartX = e.offsetX;
   drawStartY = e.offsetY;
   saveState();
-
   if(drawTool === "brush" || drawTool === "eraser"){
     const ctx = getDrawCtx();
     ctx.beginPath();
@@ -1602,14 +1663,12 @@ dc.addEventListener("mousedown", (e) => {
 
 dc.addEventListener("mousemove", (e) => {
   if(!drawing) return;
-
   if(drawTool === "brush" || drawTool === "eraser"){
     const ctx = getDrawCtx();
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
     return;
   }
-
   if(drawHistory.length > 0){
     const c = document.getElementById("drawCanvas");
     const ctx = c.getContext("2d");
@@ -1626,7 +1685,6 @@ dc.addEventListener("mousemove", (e) => {
 dc.addEventListener("mouseup", (e) => {
   if(!drawing) return;
   drawing = false;
-
   if(drawTool === "line" || drawTool === "rect" || drawTool === "circle"){
     const ctx = getDrawCtx();
     drawShapePreview(ctx, e.offsetX, e.offsetY);
@@ -1640,7 +1698,6 @@ function drawShapePreview(ctx, mx, my){
   ctx.lineWidth = getSize();
   ctx.lineCap = "round";
   ctx.beginPath();
-
   if(drawTool === "line"){
     ctx.moveTo(drawStartX, drawStartY);
     ctx.lineTo(mx, my);
@@ -1688,13 +1745,11 @@ function initParticles(){
 function drawParticles(){
   pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
   particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
+    p.x += p.dx; p.y += p.dy;
     if(p.x < 0) p.x = particleCanvas.width;
     if(p.x > particleCanvas.width) p.x = 0;
     if(p.y < 0) p.y = particleCanvas.height;
     if(p.y > particleCanvas.height) p.y = 0;
-
     pCtx.beginPath();
     pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
     pCtx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
@@ -1706,6 +1761,17 @@ function drawParticles(){
 initParticles();
 drawParticles();
 window.addEventListener("resize", initParticles);
+
+/* SCROLL FADE-IN */
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) entry.target.classList.add("visible");
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll(".fade-in").forEach(el => {
+  fadeObserver.observe(el);
+});
 
 </script>
 </body>
