@@ -42,8 +42,8 @@
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      color: var(--accent);
       font-size: 1.5rem;
+      color: var(--accent);
     }
 
     .logo img {
@@ -74,10 +74,8 @@
       background: var(--card);
       padding: 1.5rem;
       border-radius: 16px;
-      transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
+      transition: 0.2s;
     }
 
     .card:hover {
@@ -85,27 +83,14 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
-    .card h2 {
-      margin-bottom: 0.5rem;
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
     .hero {
       grid-column: 1 / -1;
       text-align: center;
       margin-bottom: 1rem;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .hero h2 {
       font-size: 2rem;
-      margin-bottom: 0.5rem;
     }
 
     .hero span {
@@ -118,7 +103,6 @@
       border: none;
       border-radius: 8px;
       background: var(--accent);
-      color: #000;
       cursor: pointer;
       font-weight: bold;
     }
@@ -130,12 +114,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
     .modal-content {
       background: var(--card);
@@ -145,26 +126,17 @@
       max-width: 600px;
     }
 
-    #calcInput, #pyInput, #ytInput {
+    input, textarea {
       width: 100%;
       padding: 0.75rem;
       border-radius: 8px;
       border: none;
-      margin: 1rem 0;
-      font-size: 1rem;
+      margin: 0.5rem 0;
     }
 
     pre {
       margin-top: 1rem;
       white-space: pre-wrap;
-      color: var(--text);
-    }
-
-    footer {
-      text-align: center;
-      padding: 1rem;
-      color: var(--muted);
-      font-size: 0.8rem;
     }
   </style>
 </head>
@@ -197,9 +169,19 @@
     <p>Evaluate expressions and explore math.</p>
   </div>
 
+  <div class="card">
+    <h2>Converter</h2>
+    <p>Unit & data conversions.</p>
+  </div>
+
+  <div class="card">
+    <h2>Visualizer</h2>
+    <p>Graphs and interactive tools.</p>
+  </div>
+
   <div class="card" onclick="openMusic()">
     <h2>Music Player</h2>
-    <p>YouTube playback system.</p>
+    <p>YouTube playlist + controls</p>
   </div>
 
   <div class="card" onclick="openPython()">
@@ -209,40 +191,35 @@
 
 </main>
 
-<!-- Calculator Modal -->
+<!-- Calculator -->
 <div id="calcModal" class="modal hidden">
   <div class="modal-content">
     <h2>Calculator</h2>
-    <input id="calcInput" placeholder="Try: 2+2, sqrt(16), sin(pi/2)" />
+    <input id="calcInput" placeholder="2+2, sqrt(16)" />
     <div id="calcOutput"></div>
     <button onclick="closeCalculator()">Close</button>
   </div>
 </div>
 
-<!-- Python Modal -->
+<!-- Python -->
 <div id="pyModal" class="modal hidden">
   <div class="modal-content">
     <h2>Python Terminal</h2>
-
-    <textarea id="pyInput" rows="10">
-print("Hello Ouroboros")
-    </textarea>
-
+    <textarea id="pyInput">print("Hello Ouroboros")</textarea>
     <button onclick="runPython()">Run</button>
     <button onclick="closePython()">Close</button>
-
     <pre id="pyOutput"></pre>
   </div>
 </div>
 
-<!-- MUSIC MODAL (YOUTUBE) -->
+<!-- MUSIC -->
 <div id="musicModal" class="modal hidden">
   <div class="modal-content">
-    <h2>YouTube Player</h2>
+    <h2>YouTube Music Player</h2>
 
-    <input id="ytInput" placeholder="Paste YouTube link or ID" />
+    <input id="ytInput" placeholder="Paste YouTube video or playlist link" />
 
-    <button onclick="loadVideo()">Load</button>
+    <button onclick="loadMedia()">Load</button>
 
     <div id="player" style="margin-top:1rem;"></div>
 
@@ -252,128 +229,92 @@ print("Hello Ouroboros")
       <button onclick="nextVideo()">⏭</button>
     </div>
 
-    <div style="margin-top:1rem;">
-      <label>Volume</label>
-      <input type="range" min="0" max="100" onchange="setVolume(this.value)">
-    </div>
+    <input type="range" min="0" max="100" value="50" onchange="setVolume(this.value)">
 
     <button onclick="closeMusic()">Close</button>
   </div>
 </div>
-
-<footer>
-  © 2026 My Utility Hub
-</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
-  function randomGreeting() {
-    const messages = [
-      "You're building something cool.",
-      "Keep going.",
-      "This will evolve into something powerful.",
-      "Your future tools live here.",
-      "Small steps → big systems."
-    ];
-    alert(messages[Math.floor(Math.random() * messages.length)]);
-  }
+function randomGreeting() {
+  const msgs = ["Keep building.", "You're close.", "Nice work.", "Systems grow from this."];
+  alert(msgs[Math.floor(Math.random()*msgs.length)]);
+}
 
-  // Calculator
-  function openCalculator() {
-    document.getElementById("calcModal").classList.remove("hidden");
-  }
+/* CALC */
+function openCalculator(){calcModal.classList.remove("hidden")}
+function closeCalculator(){calcModal.classList.add("hidden")}
 
-  function closeCalculator() {
-    document.getElementById("calcModal").classList.add("hidden");
-  }
-
-  document.getElementById("calcInput").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      try {
-        const result = math.evaluate(e.target.value);
-        document.getElementById("calcOutput").innerHTML = `<p><b>${result}</b></p>`;
-      } catch {
-        document.getElementById("calcOutput").innerHTML = `<p>Error</p>`;
-      }
+calcInput.onkeydown = e=>{
+  if(e.key==="Enter"){
+    try{
+      calcOutput.innerHTML = math.evaluate(calcInput.value);
+    }catch{
+      calcOutput.innerHTML="Error";
     }
-  });
-
-  // PYTHON (fixed output already)
-  let pyodideReady = loadPyodide();
-  let pyodide;
-
-  pyodideReady.then(p => pyodide = p);
-
-  function openPython() {
-    document.getElementById("pyModal").classList.remove("hidden");
   }
+};
 
-  function closePython() {
-    document.getElementById("pyModal").classList.add("hidden");
-  }
+/* PYTHON */
+let pyodide;
+loadPyodide().then(p=>pyodide=p);
 
-  async function runPython() {
-    const code = document.getElementById("pyInput").value;
-    const out = document.getElementById("pyOutput");
+function openPython(){pyModal.classList.remove("hidden")}
+function closePython(){pyModal.classList.add("hidden")}
 
-    try {
-      await pyodide.runPythonAsync(`
+async function runPython(){
+  await pyodide.runPythonAsync(`
 import sys
 from io import StringIO
 sys.stdout = StringIO()
 sys.stderr = sys.stdout
-      `);
+  `);
 
-      await pyodide.runPythonAsync(code);
-      out.textContent = await pyodide.runPythonAsync("sys.stdout.getvalue()");
-    } catch (e) {
-      out.textContent = e;
-    }
+  await pyodide.runPythonAsync(pyInput.value);
+  pyOutput.textContent = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+}
+
+/* MUSIC */
+let player;
+
+function openMusic(){musicModal.classList.remove("hidden")}
+function closeMusic(){musicModal.classList.add("hidden")}
+
+function getVideoID(url){
+  let m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+  return m?m[1]:url;
+}
+
+function getPlaylistID(url){
+  let m=url.match(/[?&]list=([^&]+)/);
+  return m?m[1]:null;
+}
+
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("player",{height:"250",width:"100%",videoId:""});
+}
+
+function loadMedia(){
+  let url=ytInput.value;
+  let list=getPlaylistID(url);
+
+  if(list){
+    player.loadPlaylist({listType:"playlist",list:list});
+  }else{
+    player.loadVideoById(getVideoID(url));
   }
+}
 
-  // YOUTUBE PLAYER
-  let player;
-
-  function openMusic() {
-    document.getElementById("musicModal").classList.remove("hidden");
-  }
-
-  function closeMusic() {
-    document.getElementById("musicModal").classList.add("hidden");
-  }
-
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player("player", {
-      height: "250",
-      width: "100%",
-      videoId: "",
-    });
-  }
-
-  function getID(url) {
-    const match = url.match(/(?:v=|youtu\.be\/)([^&]+)/);
-    return match ? match[1] : url;
-  }
-
-  function loadVideo() {
-    const id = getID(document.getElementById("ytInput").value);
-    player.loadVideoById(id);
-  }
-
-  function togglePlay() {
-    const state = player.getPlayerState();
-    state === 1 ? player.pauseVideo() : player.playVideo();
-  }
-
-  function nextVideo() {}
-  function prevVideo() {}
-
-  function setVolume(v) {
-    player.setVolume(v);
-  }
+function togglePlay(){
+  player.getPlayerState()===1?player.pauseVideo():player.playVideo();
+}
+function nextVideo(){player.nextVideo()}
+function prevVideo(){player.previousVideo()}
+function setVolume(v){player.setVolume(v)}
 </script>
 
 </body>
