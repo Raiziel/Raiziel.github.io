@@ -1,4 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ouroboros</title>
+  <link rel="icon" type="image/png" href="Ouroboros.png">
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #020617, #0f172a);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    nav a {
+      margin-left: 1rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+      gap: 1.5rem;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .card h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .hero {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero span {
+      color: var(--accent);
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    #calcInput, #pyInput {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      margin: 1rem 0;
+      font-size: 1rem;
+    }
+
+    pre {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Ouroboros Hub</h1>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Tools</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
 <main>
+
   <div class="hero">
     <h2>Build. <span>Experiment.</span> Expand.</h2>
     <p>What you build, you return to.</p>
@@ -25,15 +200,115 @@
     <p>Test ideas and experiments.</p>
   </div>
 
-  <!-- 🎵 Music Player -->
   <div class="card">
     <h2>Music Player</h2>
     <p>Drop your song/playlist here and jam out!</p>
   </div>
 
-  <!-- 🐍 Python Runner -->
   <div class="card" onclick="openPython()">
     <h2>Python Runner</h2>
     <p>Run Python code in-browser.</p>
   </div>
+
 </main>
+
+<!-- Calculator Modal -->
+<div id="calcModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Calculator</h2>
+    <input id="calcInput" placeholder="Try: 2+2, sqrt(16), sin(pi/2)" />
+    <div id="calcOutput"></div>
+    <button onclick="closeCalculator()">Close</button>
+  </div>
+</div>
+
+<!-- Python Modal -->
+<div id="pyModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Python Runner</h2>
+
+    <textarea id="pyInput" rows="10">
+print("Hello Ouroboros")
+    </textarea>
+
+    <button onclick="runPython()">Run</button>
+    <button onclick="closePython()">Close</button>
+
+    <pre id="pyOutput"></pre>
+  </div>
+</div>
+
+<footer>
+  © 2026 My Utility Hub
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<script>
+  function randomGreeting() {
+    const messages = [
+      "You're building something cool.",
+      "Keep going.",
+      "This will evolve into something powerful.",
+      "Your future tools live here.",
+      "Small steps → big systems."
+    ];
+    alert(messages[Math.floor(Math.random() * messages.length)]);
+  }
+
+  // Calculator
+  function openCalculator() {
+    document.getElementById("calcModal").classList.remove("hidden");
+    document.getElementById("calcInput").focus();
+  }
+
+  function closeCalculator() {
+    document.getElementById("calcModal").classList.add("hidden");
+  }
+
+  const input = document.getElementById("calcInput");
+  const output = document.getElementById("calcOutput");
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      try {
+        const result = math.evaluate(input.value);
+        output.innerHTML = `<p><b>Result:</b> ${result}</p>`;
+      } catch {
+        output.innerHTML = `<p>Invalid expression</p>`;
+      }
+    }
+  });
+
+  // Python
+  let pyodideReady = loadPyodide();
+  let pyodide;
+
+  pyodideReady.then((p) => {
+    pyodide = p;
+  });
+
+  function openPython() {
+    document.getElementById("pyModal").classList.remove("hidden");
+  }
+
+  function closePython() {
+    document.getElementById("pyModal").classList.add("hidden");
+  }
+
+  async function runPython() {
+    const code = document.getElementById("pyInput").value;
+    const out = document.getElementById("pyOutput");
+
+    try {
+      let result = await pyodide.runPythonAsync(code);
+      out.textContent = result ?? "Executed";
+    } catch (err) {
+      out.textContent = err;
+    }
+  }
+</script>
+
+</body>
+</html>
