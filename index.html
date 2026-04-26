@@ -6,10 +6,16 @@
   <title>Ouroboros</title>
   <link rel="icon" type="image/png" href="Ouroboros.png">
 
-  <!-- CodeMirror -->
+  <!-- CodeMirror core -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+
+  <!-- CodeMirror addons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
 
   <style>
     :root {
@@ -151,7 +157,7 @@
       max-width: 80%;
     }
 
-    /* CodeMirror base styling */
+    /* CodeMirror base */
     .CodeMirror {
       height: 220px;
       border-radius: 10px;
@@ -159,20 +165,19 @@
       font-size: 14px;
     }
 
-    /* FIX 1: prevent text overlapping line numbers */
+    /* FIX: gutter gets its own solid dark background so line numbers
+       don't bleed into the code area */
     .CodeMirror-gutters {
+      background: #1a2235;
       border-right: 1px solid rgba(255,255,255,0.08);
     }
 
     .CodeMirror-linenumber {
-      padding-right: 8px;
+      color: #4a5568;
+      padding: 0 8px 0 6px;
     }
 
-    .CodeMirror pre {
-      padding-left: 4px;
-    }
-
-    /* FIX 2: error/output stays inside modal */
+    /* FIX: output stays inside modal */
     #pyOutput {
       max-height: 200px;
       overflow-y: auto;
@@ -183,6 +188,7 @@
       padding: 10px;
       border-radius: 10px;
       margin-top: 10px;
+      color: var(--text);
     }
   </style>
 </head>
@@ -309,13 +315,13 @@ function randomGreeting(){
 }
 
 /* CALC */
-function openCalculator(){calcModal.classList.remove("hidden")}
-function closeCalculator(){calcModal.classList.add("hidden")}
+function openCalculator(){ calcModal.classList.remove("hidden"); }
+function closeCalculator(){ calcModal.classList.add("hidden"); }
 
 calcInput.onkeydown=e=>{
   if(e.key==="Enter"){
-    try{calcOutput.innerHTML=math.evaluate(calcInput.value);}
-    catch{calcOutput.innerHTML="Error";}
+    try{ calcOutput.innerHTML=math.evaluate(calcInput.value); }
+    catch{ calcOutput.innerHTML="Error"; }
   }
 };
 
@@ -323,110 +329,131 @@ calcInput.onkeydown=e=>{
 let pyodide;
 let editor;
 
-loadPyodide().then(p=>pyodide=p);
+loadPyodide().then(p => pyodide = p);
 
-function openPython(){pyModal.classList.remove("hidden")}
-function closePython(){pyModal.classList.add("hidden")}
+function openPython(){ pyModal.classList.remove("hidden"); }
+function closePython(){ pyModal.classList.add("hidden"); }
 
 window.addEventListener("load", () => {
   editor = CodeMirror.fromTextArea(document.getElementById("pyInput"), {
     mode: "python",
     theme: "default",
     lineNumbers: true,
+    matchBrackets: true,
     indentUnit: 4,
     tabSize: 4,
-    indentWithTabs: false
+    indentWithTabs: false,
+    autofocus: true,
+    smartIndent: true,
+    extraKeys: {
+      "Ctrl-Enter": runPython,
+      "Cmd-Enter": runPython,
+      "Tab": function(cm){ cm.replaceSelection("    ", "end"); }
+    }
   });
 });
 
 async function runPython(){
-  await pyodide.runPythonAsync(`
+  const output = document.getElementById("pyOutput");
+  output.style.color = "var(--text)";
+
+  try {
+    await pyodide.runPythonAsync(`
 import sys
 from io import StringIO
-sys.stdout=StringIO()
-sys.stderr=sys.stdout
-  `);
+sys.stdout = StringIO()
+sys.stderr = sys.stdout
+    `);
 
-  const code = editor ? editor.getValue() : pyInput.value;
+    const code = editor ? editor.getValue() : document.getElementById("pyInput").value;
+    await pyodide.runPythonAsync(code);
+    const result = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+    output.textContent = result || "Executed (no output)";
 
-  await pyodide.runPythonAsync(code);
-  pyOutput.textContent=await pyodide.runPythonAsync("sys.stdout.getvalue()");
+  } catch(err) {
+    output.textContent = "❌ Python Error:\n\n" + err;
+    output.style.color = "#ff4d4d";
+  }
 }
 
+document.addEventListener("keydown", (e) => {
+  if((e.ctrlKey || e.metaKey) && e.key === "Enter"){
+    if(editor) runPython();
+  }
+});
+
 /* AI */
-function openAI(){aiModal.classList.remove("hidden")}
-function closeAI(){aiModal.classList.add("hidden")}
+function openAI(){ aiModal.classList.remove("hidden"); }
+function closeAI(){ aiModal.classList.add("hidden"); }
 
-const chatBox=document.getElementById("chatBox");
-const aiInput=document.getElementById("aiInput");
+const chatBox = document.getElementById("chatBox");
+const aiInput = document.getElementById("aiInput");
 
-function addMessage(role,text){
-  const div=document.createElement("div");
-  if(role==="user"){
-    div.style.background="#1e293b";
-    div.style.marginLeft="auto";
-    div.innerHTML="🧑 "+text;
-  }else{
-    div.style.background="#0f3a4a";
-    div.innerHTML="🤖 "+text;
+function addMessage(role, text){
+  const div = document.createElement("div");
+  if(role === "user"){
+    div.style.background = "#1e293b";
+    div.style.marginLeft = "auto";
+    div.innerHTML = "🧑 " + text;
+  } else {
+    div.style.background = "#0f3a4a";
+    div.innerHTML = "🤖 " + text;
   }
   chatBox.appendChild(div);
-  chatBox.scrollTop=chatBox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function sendMessage(){
-  const text=aiInput.value.trim();
-  if(!text)return;
+  const text = aiInput.value.trim();
+  if(!text) return;
 
-  addMessage("user",text);
-  aiInput.value="";
+  addMessage("user", text);
+  aiInput.value = "";
 
-  const aiBubble=document.createElement("div");
-  aiBubble.style.background="#0f3a4a";
-  aiBubble.innerHTML="🤖 thinking...";
+  const aiBubble = document.createElement("div");
+  aiBubble.style.background = "#0f3a4a";
+  aiBubble.innerHTML = "🤖 thinking...";
   chatBox.appendChild(aiBubble);
 
-  try{
-    const res=await fetch(
+  try {
+    const res = await fetch(
       "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
       {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          inputs:text,
-          parameters:{max_new_tokens:200}
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inputs: text,
+          parameters: { max_new_tokens: 200 }
         })
       }
     );
 
-    const data=await res.json();
+    const data = await res.json();
+    const reply = Array.isArray(data)
+      ? data[0]?.generated_text
+      : data.generated_text || data.error || "No response";
 
-    const reply=Array.isArray(data)
-      ?data[0]?.generated_text
-      :data.generated_text||data.error||"No response";
+    aiBubble.innerHTML = "🤖 " + reply;
 
-    aiBubble.innerHTML="🤖 "+reply;
-
-  }catch(err){
-    aiBubble.innerHTML="🤖 Error: "+err.message;
+  } catch(err) {
+    aiBubble.innerHTML = "🤖 Error: " + err.message;
   }
 
-  chatBox.scrollTop=chatBox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-/* MUSIC — FIX 3: lazy init so player has a visible container */
+/* MUSIC */
 let player;
 let playerReady = false;
 
 function openMusic(){
   musicModal.classList.remove("hidden");
-  // Only create the player on first open — the iframe needs a visible container
   if(!playerReady && typeof YT !== "undefined" && YT.Player){
     initPlayer();
   }
 }
 
-function closeMusic(){musicModal.classList.add("hidden")}
+function closeMusic(){ musicModal.classList.add("hidden"); }
 
 function initPlayer(){
   player = new YT.Player("player", {
@@ -437,31 +464,29 @@ function initPlayer(){
   });
 }
 
-// YouTube API ready callback — intentionally empty
-// initPlayer() runs on first openMusic() call instead
 function onYouTubeIframeAPIReady(){}
 
 function getVideoID(url){
-  const m=url.match(/(?:v=|youtu\.be\/)([^&]+)/);
-  return m?m[1]:url;
+  const m = url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+  return m ? m[1] : url;
 }
 
 function getPlaylistID(url){
-  const m=url.match(/[?&]list=([^&]+)/);
-  return m?m[1]:null;
+  const m = url.match(/[?&]list=([^&]+)/);
+  return m ? m[1] : null;
 }
 
 function loadMedia(){
   if(!playerReady) return;
-  const url=ytInput.value;
-  const list=getPlaylistID(url);
-  if(list) player.loadPlaylist({listType:"playlist",list});
+  const url = ytInput.value;
+  const list = getPlaylistID(url);
+  if(list) player.loadPlaylist({ listType: "playlist", list });
   else player.loadVideoById(getVideoID(url));
 }
 
 function togglePlay(){
   if(!playerReady) return;
-  player.getPlayerState()===1?player.pauseVideo():player.playVideo();
+  player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo();
 }
 function nextVideo(){ if(playerReady) player.nextVideo(); }
 function prevVideo(){ if(playerReady) player.previousVideo(); }
