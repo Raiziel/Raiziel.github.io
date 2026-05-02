@@ -36,4 +36,4 @@ Everything is client-side.
 
 🎵 **Music Player** — Paste any YouTube video or playlist URL and listen while you work
 
-ℓ **LaTeX** - Render math equations that are friendly supported by KaTeX and LaTeX
+ 🟰 **LaTeX** - Render math equations that are friendly supported by KaTeX and LaTeX
