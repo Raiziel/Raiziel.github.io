@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Ouroboros</title>
   <link rel="icon" type="image/png" href="Ouroboros.png">
-
+  <!--PDF Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- CodeMirror core -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
@@ -17,6 +17,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+
+  <!-- 	KaTex Renderer -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/auto-render.min.js"></script>
 
   <style>
     :root {
@@ -514,6 +519,10 @@
       <h2>Canvas</h2>
       <p></p>
     </div>
+<div class="card" onclick="openLatex()">
+  <h2>LaTeX</h2>
+  <p></p>
+</div>
   </div>
 </section>
 
@@ -579,6 +588,7 @@
     <button onclick="closeAI()" style="margin-top:10px;">Close</button>
   </div>
 </div>
+
 
 <!-- MUSIC -->
 <div id="musicModal" class="modal hidden">
@@ -653,7 +663,53 @@
 
   </div>
 </div>
+<div id="latexModal" class="modal hidden">
+  <div class="modal-content" style=" max-width:1000px; height:80vh; display:flex; flex-direction:column;overflow:hidden;">
 
+    <h2>LaTeX Editor</h2>
+
+    <div style="flex:1; display:flex; gap:10px; min-height:0;">
+
+      <!-- LEFT: INPUT -->
+      <textarea id="latexInput" style="
+        flex:1;
+	  min-width: 0;
+ 		   min-height: 0;
+        background:#0b1220;
+        color:#e2e8f0;
+        border-radius:10px;
+        padding:10px;
+        font-family:monospace;
+	overflow-y:auto;
+	white-space: normal;
+	overflow-wrap: break-word;
+      ">$$\frac{a^2 + b^2}{c}$$</textarea>
+
+      <!-- RIGHT: RENDER -->
+      <div id="latexOutput" style="
+ 	flex:1;
+	min-width:0;
+	min-height:0;
+  	height:100%;
+ 	max-height:100%;
+  	background:white;
+  	color:black;
+  	border-radius:10px;
+ 	padding:20px;
+ 	overflow-y:auto;
+	white-space: normal;
+	overflow-wrap: break-word;
+      "></div>
+
+    </div>
+
+    <div style="display:flex;gap:10px; margin-top:10px; flex-shrink:0;">
+      <button onclick="downloadPDF()">Download PDF</button>
+      <button onclick="closeLatex()">Close</button>
+    </div>
+
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -1557,162 +1613,185 @@ document.getElementById("graphCanvas").addEventListener("mousemove", (e) => {
 document.getElementById("graphCanvas").addEventListener("mouseup", () => { graphDragging = false; });
 document.getElementById("graphCanvas").addEventListener("mouseleave", () => { graphDragging = false; });
 
-/* ---- DRAW MODE ---- */
+/* ---- DRAW MODE (TOUCH + PEN + MOUSE FIXED) ---- */
 
 let drawTool = "brush";
 let drawing = false;
-let drawStartX, drawStartY;
+let drawStartX = 0;
+let drawStartY = 0;
 let drawHistory = [];
-let drawCurrent = null;
+
+const dc = document.getElementById("drawCanvas");
 
 function resizeDrawCanvas(){
-  const c = document.getElementById("drawCanvas");
+  const c = dc;
   if(c.width !== c.clientWidth || c.height !== c.clientHeight){
     const img = c.toDataURL();
     c.width = c.clientWidth;
     c.height = c.clientHeight;
+    const ctx = c.getContext("2d");
     const i = new Image();
-    i.onload = () => { c.getContext("2d").drawImage(i, 0, 0); };
+    i.onload = () => ctx.drawImage(i, 0, 0);
     i.src = img;
   }
 }
 
 function setDrawTool(tool){
   drawTool = tool;
-  document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active-tool"));
-  const id = "tb" + tool.charAt(0).toUpperCase() + tool.slice(1);
-  const btn = document.getElementById(id);
+
+  document.querySelectorAll(".tool-btn").forEach(b =>
+    b.classList.remove("active-tool")
+  );
+
+  const btn = document.getElementById("tb" + tool.charAt(0).toUpperCase() + tool.slice(1));
   if(btn) btn.classList.add("active-tool");
-  const c = document.getElementById("drawCanvas");
-  c.style.cursor = tool === "text" ? "text" : "crosshair";
+
+  dc.style.cursor = tool === "text" ? "text" : "crosshair";
 }
 
 document.getElementById("brushSize").addEventListener("input", function(){
   document.getElementById("sizeLabel").textContent = this.value;
 });
 
-function getDrawCtx(){ return document.getElementById("drawCanvas").getContext("2d"); }
-function getDrawColor(){ return drawTool === "eraser" ? "#ffffff" : document.getElementById("drawColor").value; }
-function getSize(){ return parseInt(document.getElementById("brushSize").value); }
+function getDrawCtx(){ return dc.getContext("2d"); }
+function getDrawColor(){
+  return drawTool === "eraser"
+    ? "#ffffff"
+    : document.getElementById("drawColor").value;
+}
+function getSize(){
+  return parseInt(document.getElementById("brushSize").value);
+}
 
 function saveState(){
-  const c = document.getElementById("drawCanvas");
-  drawHistory.push(c.toDataURL());
+  drawHistory.push(dc.toDataURL());
   if(drawHistory.length > 50) drawHistory.shift();
 }
 
 function undoDraw(){
   if(drawHistory.length === 0) return;
-  const c = document.getElementById("drawCanvas");
-  const ctx = c.getContext("2d");
+
   const img = new Image();
+  const ctx = getDrawCtx();
+
   img.onload = () => {
-    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.clearRect(0, 0, dc.width, dc.height);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillRect(0, 0, dc.width, dc.height);
     ctx.drawImage(img, 0, 0);
   };
+
   img.src = drawHistory.pop();
 }
 
 function clearCanvas(){
   saveState();
-  const c = document.getElementById("drawCanvas");
-  const ctx = c.getContext("2d");
-  ctx.clearRect(0, 0, c.width, c.height);
+  const ctx = getDrawCtx();
+  ctx.clearRect(0, 0, dc.width, dc.height);
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillRect(0, 0, dc.width, dc.height);
 }
 
-function redrawDrawCanvas(){
-  const c = document.getElementById("drawCanvas");
-  const ctx = c.getContext("2d");
-  if(drawHistory.length === 0){
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, c.width, c.height);
-  }
+/* ---------- POINTER EVENTS (MOUSE + TOUCH + PEN) ---------- */
+
+function getPos(e){
+  const rect = dc.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
 }
 
-const dc = document.getElementById("drawCanvas");
+function startDraw(e){
+  e.preventDefault();
 
-dc.addEventListener("mousedown", (e) => {
-  if(drawTool === "text"){
-    const text = prompt("Enter text:");
-    if(!text) return;
-    saveState();
-    const ctx = getDrawCtx();
-    ctx.fillStyle = getDrawColor();
-    ctx.font = `${getSize() + 12}px sans-serif`;
-    ctx.fillText(text, e.offsetX, e.offsetY);
-    return;
-  }
+  const pos = getPos(e);
+  drawStartX = pos.x;
+  drawStartY = pos.y;
+
   drawing = true;
-  drawStartX = e.offsetX;
-  drawStartY = e.offsetY;
   saveState();
+
+  const ctx = getDrawCtx();
+
   if(drawTool === "brush" || drawTool === "eraser"){
-    const ctx = getDrawCtx();
     ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
+    ctx.moveTo(pos.x, pos.y);
     ctx.strokeStyle = getDrawColor();
     ctx.lineWidth = getSize();
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   }
-});
+}
 
-dc.addEventListener("mousemove", (e) => {
+function drawMove(e){
   if(!drawing) return;
+  e.preventDefault();
+
+  const pos = getPos(e);
+  const ctx = getDrawCtx();
+
   if(drawTool === "brush" || drawTool === "eraser"){
-    const ctx = getDrawCtx();
-    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
-    return;
-  }
-  if(drawHistory.length > 0){
-    const c = document.getElementById("drawCanvas");
-    const ctx = c.getContext("2d");
+  } else {
+    // shape preview
     const img = new Image();
+    if(drawHistory.length === 0) return;
+
     img.onload = () => {
-      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.clearRect(0, 0, dc.width, dc.height);
       ctx.drawImage(img, 0, 0);
-      drawShapePreview(ctx, e.offsetX, e.offsetY);
+      drawShape(ctx, pos.x, pos.y);
     };
+
     img.src = drawHistory[drawHistory.length - 1];
   }
-});
+}
 
-dc.addEventListener("mouseup", (e) => {
+function endDraw(e){
   if(!drawing) return;
   drawing = false;
+
+  const pos = getPos(e);
+
   if(drawTool === "line" || drawTool === "rect" || drawTool === "circle"){
-    const ctx = getDrawCtx();
-    drawShapePreview(ctx, e.offsetX, e.offsetY);
+    drawShape(getDrawCtx(), pos.x, pos.y);
   }
-});
+}
 
-dc.addEventListener("mouseleave", () => { drawing = false; });
-
-function drawShapePreview(ctx, mx, my){
+function drawShape(ctx, x, y){
   ctx.strokeStyle = getDrawColor();
   ctx.lineWidth = getSize();
-  ctx.lineCap = "round";
+
   ctx.beginPath();
+
   if(drawTool === "line"){
     ctx.moveTo(drawStartX, drawStartY);
-    ctx.lineTo(mx, my);
+    ctx.lineTo(x, y);
     ctx.stroke();
-  } else if(drawTool === "rect"){
-    ctx.strokeRect(drawStartX, drawStartY, mx - drawStartX, my - drawStartY);
-  } else if(drawTool === "circle"){
-    const rx = Math.abs(mx - drawStartX) / 2;
-    const ry = Math.abs(my - drawStartY) / 2;
-    const cx = (drawStartX + mx) / 2;
-    const cy = (drawStartY + my) / 2;
+  }
+
+  else if(drawTool === "rect"){
+    ctx.strokeRect(drawStartX, drawStartY, x - drawStartX, y - drawStartY);
+  }
+
+  else if(drawTool === "circle"){
+    const rx = Math.abs(x - drawStartX) / 2;
+    const ry = Math.abs(y - drawStartY) / 2;
+    const cx = (drawStartX + x) / 2;
+    const cy = (drawStartY + y) / 2;
     ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
     ctx.stroke();
   }
 }
+
+/* attach pointer events */
+dc.addEventListener("pointerdown", startDraw);
+dc.addEventListener("pointermove", drawMove);
+dc.addEventListener("pointerup", endDraw);
+dc.addEventListener("pointercancel", endDraw);
+dc.addEventListener("pointerleave", endDraw);
 
 window.addEventListener("resize", () => {
   if(vizMode === "graph"){ resizeGraphCanvas(); drawGraph(); }
@@ -1772,6 +1851,90 @@ const fadeObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll(".fade-in").forEach(el => {
   fadeObserver.observe(el);
 });
+
+function openLatex(){
+  latexModal.classList.remove("hidden");
+  renderLatex();
+}
+
+function closeLatex(){
+  latexModal.classList.add("hidden");
+}
+
+const latexInput = document.getElementById("latexInput");
+const latexOutput = document.getElementById("latexOutput");
+
+function renderLatex() {
+  const input = latexInput.value;
+
+  try {
+    let html = input;
+
+    // ONLY convert math blocks first
+    html = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, expr) =>
+      katex.renderToString(expr, { displayMode: true, throwOnError: false })
+    );
+
+    html = html.replace(/\\\[([\s\S]*?)\\\]/g, (_, expr) =>
+      katex.renderToString(expr, { displayMode: true, throwOnError: false })
+    );
+
+    html = html.replace(/\$([^\$]+?)\$/g, (_, expr) =>
+      katex.renderToString(expr, { displayMode: false, throwOnError: false })
+    );
+
+    // THEN convert simple LaTeX text commands safely
+    html = html
+      .replace(/\\textbf\{(.*?)\}/g, "<strong>$1</strong>")
+      .replace(/\\textit\{(.*?)\}/g, "<em>$1</em>");
+
+    // preserve line breaks
+    html = html.replace(/\n/g, "<br>");
+
+    latexOutput.innerHTML = html;
+
+  } catch (e) {
+    latexOutput.innerHTML = "<span style='color:red;'>Render error</span>";
+  }
+}
+latexInput.addEventListener("input", renderLatex);
+
+function downloadPDF(){
+  const source = document.getElementById("latexOutput");
+
+  const clone = source.cloneNode(true);
+
+  clone.style.overflow = "visible";
+  clone.style.height = "auto";
+  clone.style.maxHeight = "none";
+
+  const wrapper = document.createElement("div");
+  wrapper.style.padding = "20px";
+  wrapper.style.background = "white";
+  wrapper.style.color = "black";
+  wrapper.appendChild(clone);
+
+  document.body.appendChild(wrapper);
+
+  html2pdf().set({
+    margin: 0.5,
+    filename: "latex.pdf",
+
+    html2canvas: {
+      scale: 2,
+      scrollY: 0,
+      windowWidth: document.body.scrollWidth
+    },
+
+    jsPDF: {
+      unit: "in",
+      format: "letter",
+      orientation: "portrait"
+    }
+  }).from(wrapper).save().then(() => {
+    document.body.removeChild(wrapper);
+  });
+}
 
 </script>
 </body>
