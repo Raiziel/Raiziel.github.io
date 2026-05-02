@@ -35,3 +35,5 @@ Everything is client-side.
 📈 **Canvas** — Graph equations like Desmos or draw freehand with shape tools
 
 🎵 **Music Player** — Paste any YouTube video or playlist URL and listen while you work
+
+ℓ **LaTeX** - Render math equations that are friendly supported by KaTeX and LaTeX
