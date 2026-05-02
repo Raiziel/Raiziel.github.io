@@ -158,6 +158,7 @@
     .calc-btn:hover {
       background: #1e293b;
     }
+	
 
     /* SHARED PAGE SECTION */
     .page-section {
@@ -415,6 +416,9 @@
       margin-top: 10px;
       color: var(--text);
     }
+	#drawCanvas {
+  touch-action: none;
+}
   </style>
 </head>
 
@@ -1704,7 +1708,7 @@ function getPos(e){
 
 function startDraw(e){
   e.preventDefault();
-
+  dc.setPointerCapture(e.pointerId);
   const pos = getPos(e);
   drawStartX = pos.x;
   drawStartY = pos.y;
@@ -1751,10 +1755,11 @@ function drawMove(e){
 
 function endDraw(e){
   if(!drawing) return;
+  dc.releasePointerCapture(e.pointerId);
   drawing = false;
 
   const pos = getPos(e);
-
+  
   if(drawTool === "line" || drawTool === "rect" || drawTool === "circle"){
     drawShape(getDrawCtx(), pos.x, pos.y);
   }
